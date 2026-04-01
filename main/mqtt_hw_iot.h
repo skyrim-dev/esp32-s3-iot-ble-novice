@@ -12,7 +12,8 @@
 #define HW_IOT_PASSWORD "57c89eb42bd6edf2c42b50fdd03ce1d35dc82cd4ce091918fa9ad92e219d5c2e"
 
 #define HW_IOT_HOSTNAME "f1614c4895.iotda-device.cn-south-4.myhuaweicloud.com"
-#define HW_IOT_PORT 8883
+#define HW_IOT_URI "mqtt://f1614c4895.iotda-device.cn-south-4.myhuaweicloud.com:1883"
+#define HW_IOT_PORT 1883
 
 extern esp_mqtt_client_handle_t mqtt_handle;
 

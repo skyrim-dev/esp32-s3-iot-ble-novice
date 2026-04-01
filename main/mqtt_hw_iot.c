@@ -47,13 +47,13 @@ void mqtt_event_callback(void *event_handler_arg,
 
 void mqtt_hw_iot_init(void)
 {
-    esp_mqtt_client_config_t mqtt_cfg = {0};                      // 初始化配置结构体
-    mqtt_cfg.broker.address.uri = HW_IOT_HOSTNAME;                   // 设置MQTT地址
-    mqtt_cfg.broker.address.port = HW_IOT_PORT;                          // 设置MQTT端口
+    esp_mqtt_client_config_t mqtt_cfg = {0};                        // 初始化配置结构体
+    mqtt_cfg.broker.address.uri = HW_IOT_URI;                       // 设置MQTT地址
+    mqtt_cfg.broker.address.port = HW_IOT_PORT;                     // 设置MQTT端口
     mqtt_cfg.credentials.client_id = HW_IOT_CLIENT_ID;              // 设置客户端ID
     mqtt_cfg.credentials.username = HW_IOT_USERNAME;                // 设置用户名
     mqtt_cfg.credentials.authentication.password = HW_IOT_PASSWORD; // 设置密码
-    mqtt_handle = esp_mqtt_client_init(&mqtt_cfg);                // 初始化MQTT客户端句柄
+    mqtt_handle = esp_mqtt_client_init(&mqtt_cfg);                  // 初始化MQTT客户端句柄
     /* 注册事件回调函数 */
     esp_mqtt_client_register_event(mqtt_handle, ESP_EVENT_ANY_ID, mqtt_event_callback, NULL);
     esp_mqtt_client_start(mqtt_handle); // 启动MQTT客户端
@@ -61,7 +61,8 @@ void mqtt_hw_iot_init(void)
 
 void mqtt_publish_message(const char *topic, const char *message)
 {
-    if (mqtt_handle != NULL) {
+    if (mqtt_handle != NULL)
+    {
         esp_mqtt_client_publish(mqtt_handle, topic, message, strlen(message), 1, 0);
     }
 }
