@@ -1,5 +1,5 @@
-#ifndef __MQTT_HW_IOT_MESSAGE_UP_H__
-#define __MQTT_HW_IOT_MESSAGE_UP_H__
+#ifndef __MQTT_HW_IOT_MESSAGE_REPORT_H__
+#define __MQTT_HW_IOT_MESSAGE_REPORT_H__    
 
 #include <cJSON.h>
 
