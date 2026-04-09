@@ -1,12 +1,14 @@
-# 华为云 IoT 物模型属性上报 - 指南
+# 华为云 IoT - 指南
 
 ## 概述
 
-本模块用于 ESP32 设备通过 MQTT 协议向华为云 IoTDA 平台上报设备属性数据。遵循华为云 IoT 平台定义的物模型（Device Model）通信规范。
+本模块用于 ESP32 设备通过 MQTT 协议与华为云 IoTDA 平台通信：
+1. **属性上报** - 向华为云上报设备属性数据
+2. **命令接收** - 接收华为云下发的命令并返回响应
 
 **参考文档**：
 - [华为云 IoT 设备属性上报 API](https://support.huaweicloud.com/api-iothub/iot_06_v5_3010.html)
-- [华为云 IoT 快速入门](https://support.huaweicloud.com/qs-iothub/iot_05_00121.html)
+- [华为云 IoT 平台命令下发 API](https://support.huaweicloud.com/api-iothub/iot_06_v5_3014.html)
 
 ## 数据格式
 
@@ -264,10 +266,142 @@ I (xxx) hw_iot_msg: Payload: {"services":[{"service_id":"BasicData","properties"
 
 ```
 main/
-├── mqtt_hw_iot_message_up.h    # 头文件：结构体定义和 API 声明
-├── mqtt_hw_iot_message_up.c    # 源文件：函数实现
+├── mqtt_hw_iot_message_up.h    # 头文件：属性上报 API 声明
+├── mqtt_hw_iot_message_up.c    # 源文件：属性上报实现
+├── mqtt_hw_iot_command_receive.h   # 头文件：命令接收 API 声明
+├── mqtt_hw_iot_command_receive.c   # 源文件：命令接收实现
 ├── mqtt_hw_iot.h               # MQTT 配置（设备 ID、密钥等）
-├── mqtt_hw_iot.c               # MQTT 客户端初始化
+├── mqtt_hw_iot.c               # MQTT 客户端初始化和命令接收回调
 ├── main.c                      # 主程序入口
 └── CMakeLists.txt              # 构建配置
 ```
+
+---
+
+## 命令接收
+
+### Topic 规范
+
+| 方向 | Topic |
+|------|-------|
+| 下行（接收） | `$oc/devices/{device_id}/sys/commands/request_id={request_id}` |
+| 上行（响应） | `$oc/devices/{device_id}/sys/commands/response/request_id={request_id}` |
+
+### 下行数据格式
+
+```json
+{
+    "object_device_id": "{子设备ID}",
+    "command_name": "ON_OFF",
+    "service_id": "WaterMeter",
+    "paras": {
+        "value": "1"
+    }
+}
+```
+
+### 上行响应格式
+
+```json
+{
+    "result_code": 0,
+    "response_name": "COMMAND_RESPONSE",
+    "paras": {
+        "result": "success"
+    }
+}
+```
+
+### 数据结构
+
+```c
+typedef struct {
+    char topic[128];         // MQTT Topic
+    char request_id[128];   // 从 Topic 解析的 request_id
+    cJSON *command_js;      // 命令 JSON 对象
+    cJSON *object_device_id; // 设备ID字段
+    cJSON *service_id;      // 服务ID字段
+    cJSON *command_name;    // 命令名称字段
+    cJSON *paras;           // 参数字段
+} hw_iot_cmd_receive_t;
+
+extern hw_iot_cmd_receive_t hw_iot_cmd_receive;
+```
+
+### 函数
+
+| 函数 | 说明 |
+|------|------|
+| `hw_iot_command_receive_ack(char *request_id)` | 发送命令响应 ACK 到华为云平台 |
+
+### 使用示例
+
+```c
+// 在 MQTT 回调中处理命令接收
+void mqtt_event_callback(void *event_handler_arg, esp_event_base_t event_base,
+                         int32_t event_id, void *event_data)
+{
+    esp_mqtt_event_handle_t receive_data = event_data;
+    if (event_id == MQTT_EVENT_DATA) {
+        if (strstr(receive_data->topic, "/sys/commands/")) {
+            // 复制 topic 并添加 null terminator
+            int copy_len = (receive_data->topic_len < sizeof(hw_iot_cmd_receive.topic) - 1) 
+                           ? receive_data->topic_len : sizeof(hw_iot_cmd_receive.topic) - 1;
+            memcpy(hw_iot_cmd_receive.topic, receive_data->topic, copy_len);
+            hw_iot_cmd_receive.topic[copy_len] = '\0';
+
+            // 从 topic 中解析 request_id
+            char *ptr = strstr(hw_iot_cmd_receive.topic, "request_id=");
+            if (ptr) {
+                ptr += strlen("request_id=");
+                char *end = strchr(ptr, '/');
+                int len = end ? (end - ptr) : strlen(ptr);
+                if (len < sizeof(hw_iot_cmd_receive.request_id)) {
+                    memcpy(hw_iot_cmd_receive.request_id, ptr, len);
+                    hw_iot_cmd_receive.request_id[len] = '\0';
+                }
+            }
+
+            // 解析命令 JSON
+            hw_iot_cmd_receive.command_js = cJSON_Parse(receive_data->data);
+            hw_iot_cmd_receive.paras = cJSON_GetObjectItem(hw_iot_cmd_receive.command_js, "paras");
+            hw_iot_cmd_receive.command_name = cJSON_GetObjectItem(hw_iot_cmd_receive.command_js, "command_name");
+
+            // 执行命令处理...
+            // ...
+
+            // 发送响应 ACK
+            hw_iot_command_receive_ack(hw_iot_cmd_receive.request_id);
+        }
+    }
+}
+```
+
+### 日志输出
+
+模块使用 `hw_iot_cmd_ack` 标签输出日志：
+
+```
+I (xxx) hw_iot_cmd_ack: request_id: xxx-xxx-xxx
+I (xxx) hw_iot_cmd_ack: Response topic: $oc/devices/xxx/sys/commands/response/request_id=xxx-xxx-xxx
+I (xxx) hw_iot_cmd_ack: Response payload: {"result_code":0,"response_name":"COMMAND_RESPONSE","paras":{"result":"success"}}
+I (xxx) hw_iot_cmd_ack: ACK published successfully, msg_id: 1
+```
+
+### Topic 解析要点
+
+MQTT 回调中的 `topic` 是非 NULL 结尾的缓冲区，必须使用 `topic_len` 来正确解析：
+
+```c
+// 错误做法
+char *topic = receive_data->topic;
+printf("%s", topic);  // 可能崩溃或输出乱码
+
+// 正确做法
+ESP_LOGI("mqtt", "topic: %.*s", receive_data->topic_len, receive_data->topic);
+```
+
+从 Topic 解析 request_id 的核心逻辑：
+1. 先复制到本地缓冲区并添加 `\0` 结尾
+2. 使用 `strstr()` 查找 "request_id=" 
+3. 使用 `strchr()` 找到下一个 '/' 作为结束位置
