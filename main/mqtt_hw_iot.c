@@ -44,57 +44,7 @@ void mqtt_event_callback(void *event_handler_arg,
         ESP_LOGI("mqtt_hw_iot", "data: %.*s", receive_data->data_len, receive_data->data);
         if (strstr(receive_data->topic, "/sys/commands/"))
         {
-            ESP_LOGI("mqtt_hw_iot", "receive topic and data");
-            /* 解析字符串 */
-            /* 解析Topic */
-            int copy_len = (receive_data->topic_len < sizeof(hw_iot_cmd_receive.topic) - 1
-                                ? receive_data->topic_len
-                                : sizeof(hw_iot_cmd_receive.topic) - 1);     // 检查topic长度是否超过数组大小
-            memcpy(hw_iot_cmd_receive.topic, receive_data->topic, copy_len); // 复制topic字符串到hw_iot_cmd_receive.topic数组
-            hw_iot_cmd_receive.topic[copy_len] = '\0';                       // 添加字符串结束符
-            char *ptr = strstr(hw_iot_cmd_receive.topic, "request_id=");     // Topic 格式: $oc/devices/{device_id}/sys/commands/request_id={request_id}
-            if (ptr)
-            {
-                ptr += strlen("request_id="); // 跳过 "request_id="
-                // 找到下一个 '/' 或字符串结尾
-                char *end = strchr(ptr, '/');
-                int len = end ? (end - ptr) : strlen(ptr);
-                if (len < sizeof(hw_iot_cmd_receive.request_id))
-                {
-                    memcpy(hw_iot_cmd_receive.request_id, ptr, len);
-                    hw_iot_cmd_receive.request_id[len] = '\0';
-                    ESP_LOGI("mqtt_hw_iot", "request_id: %s", hw_iot_cmd_receive.request_id);
-                }
-            }
-            ESP_LOGI("mqtt_hw_iot", "topic: %s", hw_iot_cmd_receive.topic);
-            /* 解析Command */
-            hw_iot_cmd_receive.command_js = cJSON_Parse(receive_data->data);                                              // 解析JSON字符串
-            hw_iot_cmd_receive.paras = cJSON_GetObjectItem(hw_iot_cmd_receive.command_js, "paras");                       // 获取paras字段
-            hw_iot_cmd_receive.service_id = cJSON_GetObjectItem(hw_iot_cmd_receive.command_js, "service_id");             // 获取service_id字段
-            hw_iot_cmd_receive.command_name = cJSON_GetObjectItem(hw_iot_cmd_receive.command_js, "command_name");         // 获取command_name字段
-            hw_iot_cmd_receive.object_device_id = cJSON_GetObjectItem(hw_iot_cmd_receive.command_js, "object_device_id"); // 获取object_device_id字段
-            if (hw_iot_cmd_receive.paras != NULL)
-            {
-                cJSON *LightControl = cJSON_GetObjectItem(hw_iot_cmd_receive.paras, "value");
-                if (LightControl != NULL)
-                {
-                    ESP_LOGI("mqtt_hw_iot", "LightControl: %s", cJSON_GetStringValue(LightControl));
-                    if (strcmp(cJSON_GetStringValue(LightControl), "ON") == 0) // 对比字符串是否相等
-                    {
-                        if (gpio_set_level(GPIO_NUM_1, 0) == ESP_OK) // 对比字符串是否相等
-                        {
-                            hw_iot_command_receive_ack(hw_iot_cmd_receive.request_id);
-                        }
-                    }
-                    else if (strcmp(cJSON_GetStringValue(LightControl), "OFF") == 0)
-                    {
-                        if (gpio_set_level(GPIO_NUM_1, 1) == ESP_OK) // 对比字符串是否相等
-                        {
-                            hw_iot_command_receive_ack(hw_iot_cmd_receive.request_id);
-                        }
-                    }
-                }
-            }
+            hw_iot_command_parse(receive_data);
         }
         break;
     default:

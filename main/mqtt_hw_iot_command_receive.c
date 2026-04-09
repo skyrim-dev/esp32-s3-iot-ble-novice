@@ -2,31 +2,85 @@
 #include <string.h>
 #include <esp_log.h>
 #include <mqtt_client.h>
+#include <driver/gpio.h>
 #include <cJSON.h>
 
 #include "mqtt_hw_iot.h"
 #include "mqtt_hw_iot_command_receive.h"
 
-static const char *TAG = "hw_iot_cmd_ack";
+static const char *TAG = "hw_iot_cmd";
 
 hw_iot_cmd_receive_t hw_iot_cmd_receive;
 
-/**
- * @brief 发送命令响应ACK到华为云IoT平台
- *
- * 当设备接收到平台下发的命令后，需要发送响应告知平台命令执行结果。
- * 根据华为云IoTDA平台API规范，响应Topic格式为：
- *   $oc/devices/{device_id}/sys/commands/response/request_id={request_id}
- *
- * 响应JSON格式：
- *   {
- *       "result_code": 0,           // 0表示成功，其他表示失败
- *       "response_name": "COMMAND_RESPONSE",
- *       "paras": { ... }            // 响应参数（可选）
- *   }
- *
- * @param request_id 平台下发命令时携带的request_id（cJSON对象）
- */
+void hw_iot_command_parse(esp_mqtt_event_handle_t receive_data)
+{
+    if (!receive_data)
+    {
+        return;
+    }
+
+    ESP_LOGI(TAG, "receive command, topic: %.*s", receive_data->topic_len, receive_data->topic);
+
+    int copy_len = (receive_data->topic_len < sizeof(hw_iot_cmd_receive.topic) - 1)
+                       ? receive_data->topic_len
+                       : sizeof(hw_iot_cmd_receive.topic) - 1;
+    memcpy(hw_iot_cmd_receive.topic, receive_data->topic, copy_len);
+    hw_iot_cmd_receive.topic[copy_len] = '\0';
+
+    char *ptr = strstr(hw_iot_cmd_receive.topic, "request_id=");
+    if (ptr)
+    {
+        ptr += strlen("request_id=");
+        char *end = strchr(ptr, '/');
+        int len = end ? (end - ptr) : strlen(ptr);
+        if (len < sizeof(hw_iot_cmd_receive.request_id))
+        {
+            memcpy(hw_iot_cmd_receive.request_id, ptr, len);
+            hw_iot_cmd_receive.request_id[len] = '\0';
+            ESP_LOGI(TAG, "request_id: %s", hw_iot_cmd_receive.request_id);
+        }
+    }
+
+    hw_iot_cmd_receive.command_js = cJSON_Parse(receive_data->data);
+    if (!hw_iot_cmd_receive.command_js)
+    {
+        ESP_LOGE(TAG, "Failed to parse command JSON");
+        return;
+    }
+
+    hw_iot_cmd_receive.paras = cJSON_GetObjectItem(hw_iot_cmd_receive.command_js, "paras");
+    hw_iot_cmd_receive.service_id = cJSON_GetObjectItem(hw_iot_cmd_receive.command_js, "service_id");
+    hw_iot_cmd_receive.command_name = cJSON_GetObjectItem(hw_iot_cmd_receive.command_js, "command_name");
+    hw_iot_cmd_receive.object_device_id = cJSON_GetObjectItem(hw_iot_cmd_receive.command_js, "object_device_id");
+
+    if (hw_iot_cmd_receive.paras)
+    {
+        cJSON *value = cJSON_GetObjectItem(hw_iot_cmd_receive.paras, "value");
+        if (value)
+        {
+            const char *cmd_value = cJSON_GetStringValue(value);
+            ESP_LOGI(TAG, "command value: %s", cmd_value);
+
+            if (strcmp(cmd_value, "ON") == 0)
+            {
+                gpio_set_level(GPIO_NUM_1, 0);
+                hw_iot_command_receive_ack(hw_iot_cmd_receive.request_id);
+            }
+            else if (strcmp(cmd_value, "OFF") == 0)
+            {
+                gpio_set_level(GPIO_NUM_1, 1);
+                hw_iot_command_receive_ack(hw_iot_cmd_receive.request_id);
+            }
+        }
+    }
+
+    if (hw_iot_cmd_receive.command_js)
+    {
+        cJSON_Delete(hw_iot_cmd_receive.command_js);
+        hw_iot_cmd_receive.command_js = NULL;
+    }
+}
+
 void hw_iot_command_receive_ack(char *request_id)
 {
     if (!request_id || strlen(request_id) == 0)
