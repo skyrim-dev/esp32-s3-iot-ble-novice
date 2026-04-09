@@ -9,6 +9,8 @@
 **参考文档**：
 - [华为云 IoT 设备属性上报 API](https://support.huaweicloud.com/api-iothub/iot_06_v5_3010.html)
 - [华为云 IoT 平台命令下发 API](https://support.huaweicloud.com/api-iothub/iot_06_v5_3014.html)
+- [华为云 IoT 设备消息上报 API](https://support.huaweicloud.com/api-iothub/iot_06_v5_3016.html)
+- [华为云 IoT 平台消息下发 API](https://support.huaweicloud.com/api-iothub/iot_06_v5_3017.html)
 
 ## 数据格式
 
@@ -405,3 +407,128 @@ ESP_LOGI("mqtt", "topic: %.*s", receive_data->topic_len, receive_data->topic);
 1. 先复制到本地缓冲区并添加 `\0` 结尾
 2. 使用 `strstr()` 查找 "request_id=" 
 3. 使用 `strchr()` 找到下一个 '/' 作为结束位置
+
+---
+
+## 设备消息上报
+
+### 功能说明
+
+当设备无法按照产品模型中定义的属性格式进行数据上报时，可使用设备消息上报接口将设备的自定义数据格式上报给平台。平台对该消息不进行解析，可转发给应用服务器或华为云其他云服务进行存储和处理。
+
+**与属性上报的区别**：
+- **属性上报**：需符合产品模型定义的属性格式，平台会解析处理
+- **消息上报**：平台不解析数据内容，仅透传，适合自定义格式或二进制数据
+
+### Topic
+
+```
+$oc/devices/{device_id}/sys/messages/up
+```
+
+### 数据格式
+
+设备消息上报对数据内容不做固定要求，可自定义格式：
+
+**方式1：仅发送消息内容**
+```
+hello!
+```
+
+**方式2：系统格式上报**
+```json
+{
+    "object_device_id": "{子设备ID}",
+    "name": "message_name",
+    "id": "aca6a906-c74c-4302-a2ce-b17ba2ce630c",
+    "content": "hello!"
+}
+```
+
+### 参数说明
+
+| 字段 | 必选 | 类型 | 说明 |
+|------|------|------|------|
+| `object_device_id` | 可选 | String | 网关子设备上报时填写子设备ID |
+| `name` | 可选 | String | 消息名称，可不填写 |
+| `id` | 可选 | String | 消息唯一标识，如不填写平台自动生成 |
+| `content` | 必选 | String/Object | 消息内容 |
+
+### 使用示例
+
+```c
+#include <mqtt_client.h>
+
+extern esp_mqtt_client_handle_t mqtt_handle;
+
+// 上报简单字符串
+const char *msg = "hello!";
+esp_mqtt_client_publish(mqtt_handle, 
+    "$oc/devices/" HW_IOT_USERNAME "/sys/messages/up",
+    msg, strlen(msg), 0, 0);
+
+// 上报系统格式 JSON
+char json_buf[256];
+snprintf(json_buf, sizeof(json_buf),
+    "{\"name\":\"sensor_data\",\"content\":\"%s\"}", data);
+esp_mqtt_client_publish(mqtt_handle,
+    "$oc/devices/" HW_IOT_USERNAME "/sys/messages/up",
+    json_buf, strlen(json_buf), 0, 0);
+```
+
+---
+
+## 平台消息下发
+
+### 功能说明
+
+平台可以向设备下发自定义格式的消息，设备接收后自行解析处理。
+
+### Topic
+
+```
+$oc/devices/{device_id}/sys/messages/down
+```
+
+### 数据格式
+
+**系统格式**
+```json
+{
+    "object_device_id": "{子设备ID}",
+    "name": "message_name",
+    "id": "message_id",
+    "content": "hello"
+}
+```
+
+**自定义格式**
+```
+arbitrary content
+```
+
+### 参数说明
+
+| 字段 | 必选 | 类型 | 说明 |
+|------|------|------|------|
+| `object_device_id` | 可选 | String | 网关子设备下发时填写子设备ID |
+| `name` | 可选 | String | 消息名称 |
+| `id` | 可选 | String | 消息唯一标识 |
+| `content` | 必选 | String | 消息内容，可为 base64 编码 |
+
+### 接收处理示例
+
+```c
+void mqtt_event_callback(void *event_handler_arg, esp_event_base_t event_base,
+                         int32_t event_id, void *event_data)
+{
+    esp_mqtt_event_handle_t receive_data = event_data;
+    if (event_id == MQTT_EVENT_DATA) {
+        if (strstr(receive_data->topic, "/sys/messages/down")) {
+            // 处理平台下发的消息
+            ESP_LOGI("mqtt", "Received message: %.*s", 
+                receive_data->data_len, receive_data->data);
+        }
+    }
+}
+```
