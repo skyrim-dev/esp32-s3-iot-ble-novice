@@ -6,7 +6,7 @@
 
 #include "mqtt_hw_iot.h"
 #include "wifi.h"
-
+#include "mqtt_hw_iot_message_up.h"
 
 
 
@@ -22,4 +22,5 @@ void app_main(void)
     ESP_LOGI("main", "WiFi connected");
 
     mqtt_hw_iot_init();
+
 }
