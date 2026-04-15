@@ -4,7 +4,7 @@
 #include <esp_log.h>
 #include <mqtt_client.h>
 
-#include "mqtt_hw_iot_message_up.h"
+#include "mqtt_hw_iot_message_report.h"
 #include "mqtt_hw_iot.h"
 
 static const char *TAG = "hw_iot_msg";
