@@ -1,6 +1,9 @@
 .pytest_cache/
 __pycache__/
 
+# clangd index cache
+.cache/
+
 # esp-idf built binaries
 build/
 build_*_*/
