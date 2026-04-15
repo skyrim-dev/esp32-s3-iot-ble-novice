@@ -5,7 +5,8 @@
 #include <mqtt_client.h>
 
 #include "mqtt_hw_iot_message_report.h"
-#include "mqtt_hw_iot.h"
+#include "hw_iot_mqtt.h"
+#include "hw_iot_mqtt_topic.h"
 
 static const char *TAG = "hw_iot_msg";
 
@@ -255,7 +256,7 @@ void hw_iot_mes_string(HW_IOT_DM_DES *des)
  */
 void hw_iot_free_des(HW_IOT_DM_DES *des)
 {
-    if (!des)    // 参数为空
+    if (!des) // 参数为空
     {
         return;
     }
@@ -306,7 +307,7 @@ int hw_iot_report_properties(HW_IOT_DM_DES *des)
     }
 
     /* 华为云IoT属性上报Topic: $oc/devices/{device_id}/sys/properties/report */
-    const char *topic = "$oc/devices/" HW_IOT_USERNAME "/sys/properties/report";
+    const char *topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_PROPERTIES_REPORT, HW_IOT_USERNAME, NULL);
 
     /* 发布MQTT消息 (QoS=0) */
     int msg_id = esp_mqtt_client_publish(mqtt_handle, topic, des->mes_js_str, des->mes_js_len, 0, 0);
@@ -318,5 +319,10 @@ int hw_iot_report_properties(HW_IOT_DM_DES *des)
 
     ESP_LOGI(TAG, "Properties reported, topic: %s, msg_id: %d", topic, msg_id);
     ESP_LOGI(TAG, "Payload: %s", des->mes_js_str);
+
+    hw_iot_free_des(des); // 释放物模型描述结构体
+    des = NULL;
+    ESP_LOGI(TAG, "Properties reported, des freed");
+
     return 0;
 }

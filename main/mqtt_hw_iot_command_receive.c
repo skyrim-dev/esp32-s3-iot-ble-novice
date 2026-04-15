@@ -5,8 +5,9 @@
 #include <driver/gpio.h>
 #include <cJSON.h>
 
-#include "mqtt_hw_iot.h"
+#include "hw_iot_mqtt.h"
 #include "mqtt_hw_iot_command_receive.h"
+#include "hw_iot_mqtt_topic.h"
 
 static const char *TAG = "hw_iot_cmd";
 
@@ -122,9 +123,14 @@ void hw_iot_command_receive_ack(char *request_id)
         return;
     }
 
-    char topic[128];
-    snprintf(topic, sizeof(topic), "$oc/devices/%s/sys/commands/response/request_id=%s",
-             HW_IOT_USERNAME, request_id);
+    char *topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_ACK_RESPONSE, HW_IOT_USERNAME, request_id);
+    if (!topic)
+    {
+        ESP_LOGE(TAG, "Failed to get ACK response topic");
+        cJSON_free(json_str);
+        cJSON_Delete(response_json);
+        return;
+    }
 
     ESP_LOGI(TAG, "Response topic: %s", topic);
     ESP_LOGI(TAG, "Response payload: %s", json_str);

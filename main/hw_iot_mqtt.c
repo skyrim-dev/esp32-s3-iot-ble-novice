@@ -9,7 +9,7 @@
 #include <cJSON.h>
 
 #include "mqtt_hw_iot_command_receive.h"
-#include "mqtt_hw_iot.h"
+#include "hw_iot_mqtt.h"
 
 esp_mqtt_client_handle_t mqtt_handle = NULL;
 
