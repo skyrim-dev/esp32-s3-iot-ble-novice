@@ -72,18 +72,18 @@
 
     cJSON *js_root = cJSON_CreateObject();    // 创建一个 cJSON 对象
 
-    /* id */
+    /* id 字符串 */
     cJSON_AddStringToObject(js_root, "id", "123");  // 添加 id 字段，值为 "123"
 
-    /* version */
+    /* version 字符串 */
     cJSON_AddStringToObject(js_root, "version", "1.0");  // 添加 version 字段，值为 "1.0"
 
-    /* sys */
+    /* sys 对象 ack 数值 */
     cJSON *sys_js = cJSON_CreateObject();  // 创建一个 cJSON 对象 sys_js
     cJSON_AddNumberToObject(sys_js, "ack", 0);  // 添加 ack 字段，值为 0
     cJSON_AddObjectToObject(js_root, "sys", sys_js);  // 将 sys_js 对象添加到 js_root 对象中，作为 sys 字段
 
-    /* params */
+    /* params 对象 Power 对象 value 字符串 time 数值 1524448722000 */
     cJSON *params_js = cJSON_CreateObject();  // 创建一个 cJSON 对象 params_js
     cJSON *Power_js = cJSON_CreateObject();  // 创建一个 cJSON 对象 Power_js
     cJSON_AddStringToObject(Power_js, "value", "on");  // 添加 value 字段，值为 "on"
@@ -91,16 +91,17 @@
     cJSON_AddObjectToObject(params_js, "Power", Power_js);  // 将 Power_js 对象添加到 params_js 对象中，作为 Power 字段
     cJSON_AddObjectToObject(js_root, "params", params_js);  // 将 params_js 对象添加到 js_root 对象中，作为 params 字段
 
-    /* method */
+    /* method 字符串 */
     cJSON_AddStringToObject(js_root, "method", "thing.event.property.post");  // 添加 method 字段，值为 "thing.event.property.post"
 
-    /* array */
+    /* array 数组对象 */
     cJSON *array_js = cJSON_CreateArray();  // 创建一个 cJSON 数组对象 array_js
     cJSON_AddStringToObject(array_js, cJSON_CreateString("string1"));  // 添加 array 字段，值为 "string1"
     cJSON_AddStringToObject(array_js, cJSON_CreateString("string2"));  // 添加 array 字段，值为 "string2"
     cJSON_AddStringToObject(array_js, cJSON_CreateString("string3"));  // 添加 array 字段，值为 "string3"
     cJSON_AddArrayToObject(js_root, "array", array_js);  // 将 array_js 数组对象添加到 js_root 对象中，作为 array 字段
 
+    /* 生成 JSON 字符串 */
     char *js_str = cJSON_PrintUnformatted(js_root);  // 生成 JSON 字符串，不包含格式化字符
     ESP_LOGI(TAG, "js:\r\n:%s", js_str);
     free(js_str);
