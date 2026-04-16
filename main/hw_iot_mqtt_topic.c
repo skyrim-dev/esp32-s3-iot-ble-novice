@@ -70,10 +70,10 @@ int hw_iot_mqtt_topic_get_command_request_id(esp_mqtt_event_handle_t receive_dat
 {
     if (!receive_data || !strstr(receive_data->topic, "sys/commands/request_id="))
     {
-        ESP_LOGE("hw_iot_mqtt_topic_get_command_request_id", "Invalid command topic");
+        ESP_LOGW("hw_iot_mqtt_topic_get_command_request_id", "Invalid command topic");
         return ESP_FAIL;
     }
-
+W
     ESP_LOGI("hw_iot_mqtt_topic_get_command_request_id", "receive command, topic: %.*s", receive_data->topic_len, receive_data->topic);
 
     char topic[128] = {0};
