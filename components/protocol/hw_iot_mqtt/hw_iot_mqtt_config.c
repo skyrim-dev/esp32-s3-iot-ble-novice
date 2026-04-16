@@ -92,6 +92,7 @@ void mqtt_event_callback(void *event_handler_arg,
         ESP_LOGI("mqtt_hw_iot", "command_response_topic: %s", command_response_topic);
         ESP_LOGI("mqtt_hw_iot", "command_response_json_str: %s", command_response_json_str);
         hw_iot_mqtt_report(command_response_topic, command_response_json_str); // 发布命令响应
+        free(command_response_json_str);
         break;
     default:
         break;
