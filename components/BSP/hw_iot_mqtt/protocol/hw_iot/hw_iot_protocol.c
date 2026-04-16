@@ -3,7 +3,7 @@
 #include <string.h>
 #include <esp_log.h>
 
-#include "hw_iot_mqtt_topic.h"
+#include "hw_iot_protocol.h"
 #include "mqtt_config.h"
 
 static char topic_str[128] = {0};
