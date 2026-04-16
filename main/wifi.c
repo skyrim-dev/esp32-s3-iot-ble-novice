@@ -9,9 +9,35 @@
 
 #include "wifi.h"
 
-// 定义信号量
+
 SemaphoreHandle_t wifi_connected_semaphore = NULL;
 
+/**
+ * @brief WiFi事件回调函数
+ *
+ * 该函数是ESP-IDF WiFi驱动的事件回调函数，用于处理WiFi和IP相关的事件。
+ * 支持的事件类型包括：WiFi启动、连接成功、连接断开、获取IP地址等。
+ *
+ * @param event_handler_arg 事件处理器的用户参数，当前未使用
+ * @param event_base 事件基础类型，用于区分不同的事件源
+ *                   - WIFI_EVENT: WiFi相关事件
+ *                   - IP_EVENT: IP相关事件
+ * @param event_id 事件ID，标识具体的事件类型
+ *                   - WIFI_EVENT_STA_START: WiFi STA启动
+ *                   - WIFI_EVENT_STA_CONNECTED: WiFi STA连接成功
+ *                   - WIFI_EVENT_STA_DISCONNECTED: WiFi STA连接断开
+ *                   - IP_EVENT_STA_GOT_IP: 获取到IP地址
+ * @param event_data 事件数据指针，包含事件的详细信息，当前未使用
+ *
+ * @note
+ *       1. 该函数由ESP-IDF WiFi驱动在发生WiFi或IP事件时自动调用
+ *       2. 在WIFI_EVENT_STA_START事件中，会自动调用esp_wifi_connect()开始连接
+ *       3. 在WIFI_EVENT_STA_DISCONNECTED事件中，会自动重新连接WiFi
+ *       4. 在IP_EVENT_STA_GOT_IP事件中，会释放wifi_connected_semaphore信号量
+ *       5. 信号量用于通知其他任务WiFi已连接并获取到IP地址
+ *       6. 日志标签使用"wifi"
+ *       7. 对于未知的事件ID，会记录警告日志
+ */
 void wifi_event_callback(void *event_handler_arg,
                          esp_event_base_t event_base,
                          int32_t event_id,
@@ -52,6 +78,36 @@ void wifi_event_callback(void *event_handler_arg,
     }
 }
 
+/**
+ * @brief 初始化WiFi模块并连接到WiFi网络
+ *
+ * 该函数用于初始化ESP32的WiFi模块，配置为Station模式，并连接到指定的WiFi网络。
+ * 函数会创建信号量用于同步WiFi连接状态，并注册事件回调函数处理WiFi事件。
+ *
+ * @note
+ *       1. 函数会从配置宏中读取WiFi连接参数：
+ *          - WIFI_SSID: WiFi网络的SSID
+ *          - WIFI_PWD: WiFi网络的密码
+ *       2. 函数会创建二进制信号量wifi_connected_semaphore，用于同步WiFi连接状态
+ *       3. 初始化步骤包括：
+ *          - 初始化NVS Flash（用于存储WiFi配置）
+ *          - 初始化网络接口（esp_netif）
+ *          - 创建默认事件循环
+ *          - 创建默认WiFi STA网络接口
+ *          - 初始化WiFi驱动
+ *          - 注册WiFi和IP事件回调函数
+ *       4. WiFi配置包括：
+ *          - 认证模式：WPA2-PSK
+ *          - 启用保护管理帧（PMF）
+ *          - 不强制要求PMF
+ *       5. 函数会自动启动WiFi服务，开始连接到指定的WiFi网络
+ *       6. WiFi连接成功并获取IP地址后，会释放wifi_connected_semaphore信号量
+ *       7. 其他任务可以通过xSemaphoreTake等待WiFi连接完成
+ *       8. 如果WiFi连接断开，会自动重新连接
+ *       9. 该函数应该在应用程序启动时调用一次
+ *       10. 如果多次调用，可能会导致资源泄漏或异常
+ *       11. 日志标签使用"wifi"
+ */
 void wifi_init(void)
 {
     wifi_connected_semaphore = xSemaphoreCreateBinary(); // 创建二进制信号量

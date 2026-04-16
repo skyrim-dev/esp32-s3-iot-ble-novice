@@ -66,6 +66,28 @@ char *hw_iot_mqtt_topic_get(hw_iot_topic_type_t type, char *device_id, char *req
     return topic_str;
 }
 
+/**
+ * @brief 从MQTT命令主题中提取请求ID
+ *
+ * 该函数从华为云IoT平台下发的命令主题中解析并提取request_id。
+ * 命令主题格式：$oc/devices/{device_id}/sys/commands/request_id={request_id}/...
+ *
+ * @param receive_data MQTT事件数据指针，包含接收到的主题信息
+ *                    - receive_data->topic: 主题字符串
+ *                    - receive_data->topic_len: 主题长度
+ * @param request_id 用于存储提取的请求ID的缓冲区指针
+ *                   调用者需要提供足够大的缓冲区（建议128字节）
+ *
+ * @return int 成功返回ESP_OK，失败返回ESP_FAIL
+ *
+ * @note
+ *       1. 调用者必须提供有效的缓冲区，建议大小为128字节
+ *       2. 函数内部会验证主题格式，确保包含"sys/commands/request_id="
+ *       3. 如果主题格式不正确或参数无效，函数会返回ESP_FAIL
+ *       4. 提取的request_id会以空字符结尾
+ *       5. 函数会记录接收到的完整主题和提取的request_id到日志
+ *       6. 适用于MQTT事件回调函数中使用
+ */
 int hw_iot_mqtt_topic_get_command_request_id(esp_mqtt_event_handle_t receive_data, char *request_id)
 {
     if (!receive_data || !strstr(receive_data->topic, "sys/commands/request_id="))
