@@ -5,8 +5,8 @@
 #include <esp_log.h>
 #include <driver/gpio.h>
 
-#include "hw_iot_mqtt.h"
-#include "wifi.h"
+#include "mqtt_config.h"
+#include "wifi.h"   
 #include "hw_iot_mqtt_topic.h"
 #include "json_util.h"
 

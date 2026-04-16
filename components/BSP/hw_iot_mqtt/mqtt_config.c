@@ -8,7 +8,7 @@
 #include <driver/gpio.h>
 #include <cJSON.h>
 
-#include "hw_iot_mqtt.h"
+#include "mqtt_config.h"
 #include "json_util.h"
 #include "hw_iot_mqtt_topic.h"
 
