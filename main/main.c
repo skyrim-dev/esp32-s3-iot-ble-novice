@@ -43,13 +43,4 @@ void app_main(void)
     char *topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_PROPERTIES_REPORT, DEVICE_ID, NULL);
     ESP_LOGI("main", "topic: %s, json_str: %s", topic, json_str);
     hw_iot_mqtt_report(topic, json_str);
-
-    /* 测试命令响应 */
-    hw_iot_mqtt_command_response_json_t command_response_json = {
-        .result_code = 0,
-        .response_name = "COMMAND_RESPONSE",
-        .result = "success"
-    };
-    char *command_response_json_str = hw_iot_mqtt_command_response_json(&command_response_json);
-    ESP_LOGI("main", "command_response_json_str: %s", command_response_json_str);
 }

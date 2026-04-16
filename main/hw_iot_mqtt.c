@@ -10,6 +10,8 @@
 
 #include "mqtt_hw_iot_command_receive.h"
 #include "hw_iot_mqtt.h"
+#include "hw_iot_mqtt_json.h"
+
 
 static const char *hw_iot_cert = "-----BEGIN CERTIFICATE-----\n"
                                  "MIIDXzCCAkegAwIBAgILBAAAAAABIVhTCKIwDQYJKoZIhvcNAQELBQAwTDEgMB4G"
@@ -62,6 +64,14 @@ void mqtt_event_callback(void *event_handler_arg,
         ESP_LOGI("mqtt_hw_iot", "data length: %d", receive_data->data_len);
         ESP_LOGI("mqtt_hw_iot", "topic: %.*s", receive_data->topic_len, receive_data->topic);
         ESP_LOGI("mqtt_hw_iot", "data: %.*s", receive_data->data_len, receive_data->data);
+        /* 测试命令响应 */
+        hw_iot_mqtt_command_response_json_t command_response_json = {
+            .result_code = 0,
+            .response_name = "COMMAND_RESPONSE",
+            .result = "success"};
+        char *command_response_json_str = hw_iot_mqtt_command_response_json(&command_response_json);
+        ESP_LOGI("mqtt_hw_iot", "command_response_json_str: %s", command_response_json_str);
+
         if (strstr(receive_data->topic, "/sys/commands/"))
         {
             hw_iot_command_parse(receive_data);
