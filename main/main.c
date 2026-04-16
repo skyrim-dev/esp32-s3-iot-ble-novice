@@ -6,8 +6,8 @@
 #include <driver/gpio.h>
 
 #include "mqtt_config.h"
-#include "hw_iot_topic.h"
-#include "hw_iot_json.h"
+#include "hw_iot_mqtt_topic.h"
+#include "hw_iot_mqtt_json.h"
 #include "wifi.h"
 
 static void led_init(void)
@@ -32,7 +32,7 @@ void app_main(void)
     ESP_LOGI("main", "WiFi connected");
 
     /* 初始化MQTT客户端 */
-    hw_iot_mqtt_init();
+    mqtt_init();
 
     /* 测试属性上报 */
     hw_iot_mqtt_properties_report_json_t json = {

@@ -4,7 +4,7 @@
 #include <esp_err.h>
 #include <time.h>
 
-#include "hw_iot_json.h"
+#include "hw_iot_mqtt_json.h"
 
 /**
  * @brief 生成华为云IoT平台属性上报的JSON字符串

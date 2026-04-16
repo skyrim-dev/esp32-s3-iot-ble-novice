@@ -9,8 +9,8 @@
 #include <cJSON.h>
 
 #include "mqtt_config.h"
-#include "hw_iot_json.h"
-#include "hw_iot_topic.h"
+#include "hw_iot/hw_iot_mqtt_json.h"
+#include "hw_iot/hw_iot_mqtt_topic.h"
 
 static const char *hw_iot_cert = "-----BEGIN CERTIFICATE-----\n"
                                  "MIIDXzCCAkegAwIBAgILBAAAAAABIVhTCKIwDQYJKoZIhvcNAQELBQAwTDEgMB4G"
@@ -187,7 +187,7 @@ int hw_iot_mqtt_report(char *topic, char *json_str)
  *       8. 该函数应该在应用程序启动时调用一次
  *       9. 如果多次调用，可能会导致资源泄漏或异常
  */
-void hw_iot_mqtt_init(void)
+void mqtt_init(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {0};
     mqtt_cfg.broker.address.uri = HW_IOT_URI;

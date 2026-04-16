@@ -18,6 +18,6 @@ void mqtt_event_callback(void *event_handler_arg,
                          int32_t event_id,
                          void *event_data);          // MQTT 事件回调函数
 int hw_iot_mqtt_report(char *topic, char *json_str); // 发布 JSON 字符串到指定主题
-void hw_iot_mqtt_init(void);                         // 初始化 MQTT 客户端并连接到华为云 IoT 平台
+void mqtt_init(void);                                // 初始化 MQTT 客户端并连接到华为云 IoT 平台
 
 #endif
