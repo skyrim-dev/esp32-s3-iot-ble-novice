@@ -5,5 +5,6 @@ idf_component_register(
         "hw_iot_mqtt/hw_iot_mqtt_topic.c"
     INCLUDE_DIRS "hw_iot_mqtt"
     REQUIRES esp_netif mqtt esp_timer nvs_flash json esp_wifi esp_driver_gpio
+
     EMBED_FILES "hw_iot_mqtt/cert.pem"
 )
