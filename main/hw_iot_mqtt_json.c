@@ -42,7 +42,7 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
         int j = 0;
         while (j < HW_IOT_MQTT_PROPERTIES_NUM)
         {
-            cJSON_AddStringToObject(properties_js, json->json[i].properties_id[j], json->json[i].properties_value[j]); // 添加 property_id 到 properties 对象
+            cJSON_AddNumberToObject(properties_js, json->json[i].properties_id[j], json->json[i].properties_value[j]); // 添加 property_id 到 properties 对象
             j++;
         }
 
@@ -51,7 +51,7 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
         struct tm *tm_info = gmtime(&now);                               // 获取UTC时间结构体
         char time_buf[32];                                               // 用于存储格式化后的UTC时间字符串
         strftime(time_buf, sizeof(time_buf), "%Y%m%dT%H%M%SZ", tm_info); // 格式化UTC时间字符串
-        cJSON_AddStringToObject(service_obj_js, "time", time_buf);       // 添加 time 到服务对象
+        cJSON_AddStringToObject(service_obj_js, "event_time", time_buf);       // 添加 time 到服务对象
 
         i++;
     }
@@ -66,8 +66,7 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
     }
     ESP_LOGI("hw_iot_mqtt_properties_report_json", "js:\r\n:%s", js_str);
 
-    free(js_str);
-    cJSON_Delete(root_js);
+    cJSON_Delete(root_js);  // 释放根 json 对象
 
     return js_str;
 }

@@ -13,11 +13,11 @@
 
 extern esp_mqtt_client_handle_t mqtt_handle;
 
-void mqtt_hw_iot_init(void);
-
 void mqtt_event_callback(void *event_handler_arg,
                          esp_event_base_t event_base,
                          int32_t event_id,
                          void *event_data);
+int hw_iot_mqtt_report(char *topic, char *json_str);
+void hw_iot_mqtt_init(void);
 
 #endif

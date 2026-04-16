@@ -52,7 +52,36 @@ void mqtt_event_callback(void *event_handler_arg,
     }
 }
 
-void mqtt_hw_iot_init(void)
+int hw_iot_mqtt_report(char *topic, char *json_str)
+{
+    if (!topic || !json_str || strlen(json_str) <= 0) // 参数为空
+    {
+        ESP_LOGE("mqtt_hw_iot", "Invalid message data");
+        return -1;
+    }
+
+    if (!mqtt_handle) // 因为 mqtt_handle 是全局变量，所以可以检测 mqtt 客户端是否初始化
+    {
+        ESP_LOGE("mqtt_hw_iot", "MQTT client not initialized");
+        return -1;
+    }
+
+    /* 发布MQTT消息 (QoS=0) */
+    int msg_id = esp_mqtt_client_publish(mqtt_handle, topic, json_str, strlen(json_str), 0, 0);
+    if (msg_id < 0) // 发布消息失败
+    {
+        ESP_LOGE("mqtt_hw_iot", "Failed to publish message, msg_id=%d", msg_id);
+        return -1;
+    }
+
+    ESP_LOGI("mqtt_hw_iot", "Properties reported, topic: %s, msg_id: %d", topic, msg_id);
+    ESP_LOGI("mqtt_hw_iot", "Payload: %s", json_str);
+
+    return 0;
+}
+
+
+void hw_iot_mqtt_init(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {0};
     mqtt_cfg.broker.address.uri = HW_IOT_URI;
