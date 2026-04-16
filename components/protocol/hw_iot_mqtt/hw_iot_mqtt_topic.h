@@ -3,7 +3,7 @@
 
 #include <mqtt_client.h>
 
-#define DEVICE_ID "69cc7e9c6b6c4d5f8d58bd94_3c-84-27-c0-2e-6c"
+
 
 typedef enum
 {

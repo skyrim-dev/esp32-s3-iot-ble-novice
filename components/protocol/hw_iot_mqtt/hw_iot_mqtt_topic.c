@@ -4,7 +4,7 @@
 #include <esp_log.h>
 
 #include "hw_iot_mqtt_topic.h"
-#include "mqtt_config.h"
+#include "hw_iot_mqtt_config.h"
 
 static char topic_str[128] = {0};
 

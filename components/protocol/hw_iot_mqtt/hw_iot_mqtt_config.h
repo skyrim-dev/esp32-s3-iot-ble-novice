@@ -1,8 +1,9 @@
-#ifndef MQTT_CONFIG_H
-#define MQTT_CONFIG_H
+#ifndef HW_IOT_MQTT_CONFIG_H
+#define HW_IOT_MQTT_CONFIG_H
 
 #include <mqtt_client.h>
 
+// ========== 华为云连接参数 ========== 
 #define HW_IOT_PRODUCTKEY "69cc7e9c6b6c4d5f8d58bd94"
 #define HW_IOT_CLIENT_ID "69cc7e9c6b6c4d5f8d58bd94_3c-84-27-c0-2e-6c_0_0_2026040109"
 #define HW_IOT_USERNAME "69cc7e9c6b6c4d5f8d58bd94_3c-84-27-c0-2e-6c"
@@ -11,13 +12,16 @@
 #define HW_IOT_URI "mqtts://" HW_IOT_HOSTNAME ":8883"
 #define HW_IOT_PORT 8883
 
-extern esp_mqtt_client_handle_t mqtt_handle;
+// ========== 设备信息 ==========
+#define HW_IOT_DEVICE_ID "69cc7e9c6b6c4d5f8d58bd94_3c-84-27-c0-2e-6c"
 
+// ========== 函数声明 ==========
+extern esp_mqtt_client_handle_t mqtt_handle;
 void mqtt_event_callback(void *event_handler_arg,
                          esp_event_base_t event_base,
                          int32_t event_id,
                          void *event_data);          // MQTT 事件回调函数
 int hw_iot_mqtt_report(char *topic, char *json_str); // 发布 JSON 字符串到指定主题
-void mqtt_init(void);                                // 初始化 MQTT 客户端并连接到华为云 IoT 平台
+void hw_iot_mqtt_init(void);                                // 初始化 MQTT 客户端并连接到华为云 IoT 平台
 
 #endif

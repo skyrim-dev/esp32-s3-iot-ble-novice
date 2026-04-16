@@ -1,5 +1,5 @@
 idf_component_register(
     SRCS "main.c"
-    INCLUDE_DIRS "." "../components/driver/wifi" "../components/protocol/mqtt/hw_iot" "../components/protocol/mqtt"
-    REQUIRES BSP esp_driver_gpio
+    INCLUDE_DIRS "." "../components/protocol/hw_iot_mqtt"
+    REQUIRES protocol network esp_driver_gpio
 )
