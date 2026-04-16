@@ -4,8 +4,8 @@
 #include <cJSON.h>
 #include <string.h>
 
-#define HW_IOT_MQTT_SERVICES_NUM 1   /* 服务上报 json 服务数量 */
-#define HW_IOT_MQTT_PROPERTIES_NUM 1 /* 属性上报 json 属性数量 */
+#define HW_IOT_MQTT_SERVICES_NUM 10   /* 服务上报 json 服务数量 */
+#define HW_IOT_MQTT_PROPERTIES_NUM 10 /* 属性上报 json 属性数量 */
 
 /* 事件属性上报，属性结构体 */
 typedef struct

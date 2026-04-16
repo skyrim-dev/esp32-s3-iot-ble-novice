@@ -6,8 +6,35 @@
 
 #include "hw_iot_mqtt_json.h"
 
+/**
+ * @brief 生成华为云IoT平台属性上报的JSON字符串
+ * 
+ * 该函数根据输入的服务和属性数据结构，生成符合华为云IoT平台要求的JSON格式字符串。
+ * JSON结构为：{"services": [{"service_id": "xxx", "properties": {"key": value}, "event_time": "UTC时间"}]}
+ * 
+ * @param json 指向hw_iot_mqtt_properties_report_json_t结构体的指针，包含需要上报的服务和属性数据
+ *               - json[].service_id: 服务ID，为NULL时表示服务结束
+ *               - json[].properties_id[]: 属性ID数组，为NULL时表示属性结束
+ *               - json[].properties_value[]: 属性值数组，与properties_id一一对应
+ * 
+ * @return char* 成功返回动态分配的JSON字符串指针，失败返回NULL
+ *               注意：调用者需要在使用完毕后调用free()释放返回的字符串内存
+ * 
+ * @note 
+ *       1. 函数内部会自动释放cJSON对象树，调用者只需负责释放返回的JSON字符串
+ *       2. 时间格式使用华为云要求的UTC格式：YYYYMMDDThhmmssZ
+ *       3. 生成的JSON字符串为无格式化版本，减少传输数据量
+ *       4. 如果cJSON创建或序列化失败，函数会返回NULL并记录错误日志
+ *       5. 支持动态服务数量，通过service_id为NULL判断结束
+ *       6. 支持动态属性数量，通过properties_id为NULL判断结束
+ */
 char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *json)
 {
+    if (!json)
+    {
+        ESP_LOGE("hw_iot_mqtt_properties_report_json", "Input json pointer is NULL");
+        return NULL;
+    }
     /* 创建根 json 对象 */
     cJSON *root_js = cJSON_CreateObject(); // 创建根 json 对象
     if (!root_js)
@@ -30,18 +57,40 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
     uint8_t i = 0;
     while (i < HW_IOT_MQTT_SERVICES_NUM)
     {
+        if (json->json[i].service_id == NULL)   // 如果 service_id 为空，说明没有更多服务了，退出循环
+        {
+            ESP_LOGW("hw_iot_mqtt_properties_report_json", "Configuration allows up to 10 services, but only %d services found", i);
+            break;
+        }
         /* 重要 */
         cJSON *service_obj_js = cJSON_CreateObject();      // 创建 services 数组对象里的单个服务对象
+        if (!service_obj_js)
+        {
+            ESP_LOGE("hw_iot_mqtt_properties_report_json", "cJSON_CreateObject failed");
+            cJSON_Delete(root_js);
+            return NULL;
+        }
         cJSON_AddItemToArray(services_js, service_obj_js); // 把对象加入数组
 
         cJSON_AddStringToObject(service_obj_js, "service_id", json->json[i].service_id); // 添加 service_id 到服务对象
 
         cJSON *properties_js = cJSON_CreateObject();                        // 创建 properties 对象
+        if (!properties_js)
+        {
+            ESP_LOGE("hw_iot_mqtt_properties_report_json", "cJSON_CreateObject failed");
+            cJSON_Delete(root_js);
+            return NULL;
+        }
         cJSON_AddItemToObject(service_obj_js, "properties", properties_js); // 添加 properties 对象到服务对象
 
         int j = 0;
         while (j < HW_IOT_MQTT_PROPERTIES_NUM)
         {
+            if (json->json[i].properties_id[j] == NULL)   // 如果 property_id 为空，说明没有更多属性了，退出循环
+            {
+                ESP_LOGW("hw_iot_mqtt_properties_report_json", "Configuration allows up to 10 properties per service, but only %d properties found for service_id: %s", j, json->json[i].service_id);
+                break;
+            }
             cJSON_AddNumberToObject(properties_js, json->json[i].properties_id[j], json->json[i].properties_value[j]); // 添加 property_id 到 properties 对象
             j++;
         }
@@ -51,7 +100,7 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
         struct tm *tm_info = gmtime(&now);                               // 获取UTC时间结构体
         char time_buf[32];                                               // 用于存储格式化后的UTC时间字符串
         strftime(time_buf, sizeof(time_buf), "%Y%m%dT%H%M%SZ", tm_info); // 格式化UTC时间字符串
-        cJSON_AddStringToObject(service_obj_js, "event_time", time_buf);       // 添加 time 到服务对象
+        cJSON_AddStringToObject(service_obj_js, "event_time", time_buf); // 添加 time 到服务对象
 
         i++;
     }
@@ -64,10 +113,9 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
         cJSON_Delete(root_js);
         return NULL;
     }
-    ESP_LOGI("hw_iot_mqtt_properties_report_json", "js:\r\n:%s", js_str);
+    ESP_LOGI("hw_iot_mqtt_properties_report_json", "Generated JSON for service(s): %s", js_str);
 
-    cJSON_Delete(root_js);  // 释放根 json 对象
+    cJSON_Delete(root_js); // 释放根 json 对象
 
     return js_str;
 }
-
