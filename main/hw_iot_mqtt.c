@@ -100,11 +100,11 @@ void mqtt_event_callback(void *event_handler_arg,
         char request_id[128] = {0};
         if (hw_iot_mqtt_topic_get_command_request_id(receive_data, request_id) != ESP_OK) // 从 topic 中提取 request_id
         {
-            ESP_LOGE("mqtt_hw_iot", "Failed to get request_id from topic");
+            ESP_LOGW("mqtt_hw_iot", "Failed to get request_id from topic");
             return;
         }
         char *command_response_topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_COMMAND_RESPONSE, DEVICE_ID, request_id); // 获取命令响应 topic
-        char *command_response_json_str = hw_iot_mqtt_command_response_json(&command_response_json);                // 生成命令响应 JSON 字符串
+        char *command_response_json_str = hw_iot_Wmqtt_command_response_json(&command_response_json);                // 生成命令响应 JSON 字符串
         ESP_LOGI("mqtt_hw_iot", "request_id: %s", request_id);
         ESP_LOGI("mqtt_hw_iot", "command_response_topic: %s", command_response_topic);
         ESP_LOGI("mqtt_hw_iot", "command_response_json_str: %s", command_response_json_str);
