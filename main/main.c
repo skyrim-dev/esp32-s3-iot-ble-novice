@@ -20,25 +20,36 @@ void app_main(void)
 {
     /* 初始化日志模块 */
     ESP_LOGI("main", "Hello world!");
+
     /* 初始化LED */
     led_init();
+
     /* 初始化WiFi */
     wifi_init();
+
     /* 等待WiFi连接成功，获取到IP地址后，初始化MQTT客户端 */
     xSemaphoreTake(wifi_connected_semaphore, portMAX_DELAY); // 等待WiFi连接成功
     ESP_LOGI("main", "WiFi connected");
+
     /* 初始化MQTT客户端 */
     hw_iot_mqtt_init();
+
     /* 测试属性上报 */
     hw_iot_mqtt_properties_report_json_t json = {
         {
-            {
-                "BasicData", {"luminance"}, {100}
-            },
-        }
-    };
+            {"BasicData", {"luminance"}, {1}},
+        }};
     char *json_str = hw_iot_mqtt_properties_report_json(&json);
     char *topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_PROPERTIES_REPORT, DEVICE_ID, NULL);
     ESP_LOGI("main", "topic: %s, json_str: %s", topic, json_str);
     hw_iot_mqtt_report(topic, json_str);
+
+    /* 测试命令响应 */
+    hw_iot_mqtt_command_response_json_t command_response_json = {
+        .result_code = 0,
+        .response_name = "COMMAND_RESPONSE",
+        .result = "success"
+    };
+    char *command_response_json_str = hw_iot_mqtt_command_response_json(&command_response_json);
+    ESP_LOGI("main", "command_response_json_str: %s", command_response_json_str);
 }

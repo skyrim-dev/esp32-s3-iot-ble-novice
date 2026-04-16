@@ -8,19 +8,19 @@
 
 /**
  * @brief 生成华为云IoT平台属性上报的JSON字符串
- * 
+ *
  * 该函数根据输入的服务和属性数据结构，生成符合华为云IoT平台要求的JSON格式字符串。
  * JSON结构为：{"services": [{"service_id": "xxx", "properties": {"key": value}, "event_time": "UTC时间"}]}
- * 
+ *
  * @param json 指向hw_iot_mqtt_properties_report_json_t结构体的指针，包含需要上报的服务和属性数据
  *               - json[].service_id: 服务ID，为NULL时表示服务结束
  *               - json[].properties_id[]: 属性ID数组，为NULL时表示属性结束
  *               - json[].properties_value[]: 属性值数组，与properties_id一一对应
- * 
+ *
  * @return char* 成功返回动态分配的JSON字符串指针，失败返回NULL
  *               注意：调用者需要在使用完毕后调用free()释放返回的字符串内存
- * 
- * @note 
+ *
+ * @note
  *       1. 函数内部会自动释放cJSON对象树，调用者只需负责释放返回的JSON字符串
  *       2. 时间格式使用华为云要求的UTC格式：YYYYMMDDThhmmssZ
  *       3. 生成的JSON字符串为无格式化版本，减少传输数据量
@@ -57,13 +57,13 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
     uint8_t i = 0;
     while (i < HW_IOT_MQTT_SERVICES_NUM)
     {
-        if (json->json[i].service_id == NULL)   // 如果 service_id 为空，说明没有更多服务了，退出循环
+        if (json->json[i].service_id == NULL) // 如果 service_id 为空，说明没有更多服务了，退出循环
         {
             ESP_LOGW("hw_iot_mqtt_properties_report_json", "Configuration allows up to 10 services, but only %d services found", i);
             break;
         }
         /* 重要 */
-        cJSON *service_obj_js = cJSON_CreateObject();      // 创建 services 数组对象里的单个服务对象
+        cJSON *service_obj_js = cJSON_CreateObject(); // 创建 services 数组对象里的单个服务对象
         if (!service_obj_js)
         {
             ESP_LOGE("hw_iot_mqtt_properties_report_json", "cJSON_CreateObject failed");
@@ -74,7 +74,7 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
 
         cJSON_AddStringToObject(service_obj_js, "service_id", json->json[i].service_id); // 添加 service_id 到服务对象
 
-        cJSON *properties_js = cJSON_CreateObject();                        // 创建 properties 对象
+        cJSON *properties_js = cJSON_CreateObject(); // 创建 properties 对象
         if (!properties_js)
         {
             ESP_LOGE("hw_iot_mqtt_properties_report_json", "cJSON_CreateObject failed");
@@ -86,7 +86,7 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
         int j = 0;
         while (j < HW_IOT_MQTT_PROPERTIES_NUM)
         {
-            if (json->json[i].properties_id[j] == NULL)   // 如果 property_id 为空，说明没有更多属性了，退出循环
+            if (json->json[i].properties_id[j] == NULL) // 如果 property_id 为空，说明没有更多属性了，退出循环
             {
                 ESP_LOGW("hw_iot_mqtt_properties_report_json", "Configuration allows up to 10 properties per service, but only %d properties found for service_id: %s", j, json->json[i].service_id);
                 break;
@@ -106,6 +106,47 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
     }
 
     /* 将cJSON对象序列化为无格式JSON字符串 */
+    char *js_str = cJSON_UnformattedFree(root_js); // 生成 JSON 字符串，不包含格式化字符
+
+    return js_str;
+}
+
+char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *json)
+{
+    if (!json)
+    {
+        ESP_LOGE("hw_iot_mqtt_command_response_json", "Input json pointer is NULL");
+        return NULL;
+    }
+    /* 创建根 json 对象 */
+    cJSON *root_js = cJSON_CreateObject(); // 创建根 json 对象
+    if (!root_js)
+    {
+        ESP_LOGE("hw_iot_mqtt_command_response_json", "cJSON_CreateObject failed");
+        return NULL;
+    }
+    cJSON_AddNumberToObject(root_js, "result_code", json->result_code);     // 添加 result_code 到根 json 对象
+    cJSON_AddStringToObject(root_js, "response_name", json->response_name); // 添加 response_name 到根 json 对象
+
+    cJSON *paras_js = cJSON_CreateObject(); // 创建 paras 对象
+    if (!paras_js)
+    {
+        ESP_LOGE("hw_iot_mqtt_command_response_json", "cJSON_CreateObject failed");
+        cJSON_Delete(root_js);
+        return NULL;
+    }
+    cJSON_AddItemToObject(root_js, "paras", paras_js);         // 添加 paras 对象到根 json 对象
+    cJSON_AddStringToObject(paras_js, "result", json->result); // 添加 result 到 paras 对象
+
+    /* 将cJSON对象序列化为无格式JSON字符串 */
+    char *js_str = cJSON_UnformattedFree(root_js); // 生成 JSON 字符串，不包含格式化字符
+
+    return js_str;
+}
+
+char *cJSON_UnformattedFree(cJSON *root_js)
+{
+    /* 将cJSON对象序列化为无格式JSON字符串 */
     char *js_str = cJSON_PrintUnformatted(root_js); // 生成 JSON 字符串，不包含格式化字符
     if (!js_str)
     {
@@ -119,4 +160,3 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
 
     return js_str;
 }
-
