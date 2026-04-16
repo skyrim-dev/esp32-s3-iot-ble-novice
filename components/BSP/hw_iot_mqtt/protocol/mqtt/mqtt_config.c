@@ -10,7 +10,7 @@
 
 #include "mqtt_config.h"
 #include "json_util.h"
-#include "hw_iot_protocol.h"
+#include "hw_iot_topic.h"
 
 static const char *hw_iot_cert = "-----BEGIN CERTIFICATE-----\n"
                                  "MIIDXzCCAkegAwIBAgILBAAAAAABIVhTCKIwDQYJKoZIhvcNAQELBQAwTDEgMB4G"
