@@ -6,9 +6,9 @@
 #include <driver/gpio.h>
 
 #include "mqtt_config.h"
-#include "wifi.h"   
 #include "hw_iot_topic.h"
 #include "hw_iot_json.h"
+#include "wifi.h"
 
 static void led_init(void)
 {
