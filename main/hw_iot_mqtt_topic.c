@@ -70,13 +70,13 @@ int hw_iot_mqtt_topic_get_command_request_id(esp_mqtt_event_handle_t receive_dat
 {
     if (!receive_data || !strstr(receive_data->topic, "sys/commands/request_id="))
     {
-        ESP_LOGE("mqtt_hw_iot", "Invalid command topic");
+        ESP_LOGE("hw_iot_mqtt_topic_get_command_request_id", "Invalid command topic");
         return ESP_FAIL;
     }
 
-    ESP_LOGI("mqtt_hw_iot", "receive command, topic: %.*s", receive_data->topic_len, receive_data->topic);
+    ESP_LOGI("hw_iot_mqtt_topic_get_command_request_id", "receive command, topic: %.*s", receive_data->topic_len, receive_data->topic);
 
-    char topic[96] = {0};
+    char topic[128] = {0};
     int copy_len = (receive_data->topic_len < sizeof(topic) - 1)
                        ? receive_data->topic_len
                        : sizeof(topic) - 1;       // 计算要复制的长度，确保不超过缓冲区大小
@@ -88,12 +88,9 @@ int hw_iot_mqtt_topic_get_command_request_id(esp_mqtt_event_handle_t receive_dat
         ptr += strlen("request_id=");              // 跳过"request_id="前缀
         char *end = strchr(ptr, '/');              // 查找请求ID后面的斜杠，确定请求ID的结束位置
         int len = end ? (end - ptr) : strlen(ptr); // 计算请求ID的长度，如果没有斜杠，则使用剩余字符串的长度
-        if (len < sizeof(request_id))              // 确保请求ID长度不超过缓冲区大小
-        {
-            memcpy(request_id, ptr, len); // 复制请求ID到本地缓冲区
-            request_id[len] = '\0';       // 确保字符串以空字符结尾
-            ESP_LOGI("mqtt_hw_iot", "request_id: %s", request_id);
-        }
+        memcpy(request_id, ptr, len);              // 复制请求ID到本地缓冲区
+        request_id[len] = '\0';                    // 确保字符串以空字符结尾
+        ESP_LOGI("hw_iot_mqtt_topic_get_command_request_id", "request_id: %s", request_id);
     }
     return ESP_OK;
 }
