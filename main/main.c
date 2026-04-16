@@ -39,8 +39,8 @@ void app_main(void)
         {
             {"BasicData", {"luminance"}, {1}},
         }};
-    char *json_str = hw_iot_mqtt_properties_report_json(&json);
     char *topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_PROPERTIES_REPORT, DEVICE_ID, NULL);
+    char *json_str = hw_iot_mqtt_properties_report_json(&json);
     ESP_LOGI("main", "topic: %s, json_str: %s", topic, json_str);
     hw_iot_mqtt_report(topic, json_str);
 }

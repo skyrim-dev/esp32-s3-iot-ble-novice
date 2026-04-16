@@ -7,11 +7,12 @@
 #include <mbedtls/md.h>
 #include <driver/gpio.h>
 #include <cJSON.h>
+#include <esp_err.h>
 
 #include "mqtt_hw_iot_command_receive.h"
 #include "hw_iot_mqtt.h"
 #include "hw_iot_mqtt_json.h"
-
+#include "hw_iot_mqtt_topic.h"
 
 static const char *hw_iot_cert = "-----BEGIN CERTIFICATE-----\n"
                                  "MIIDXzCCAkegAwIBAgILBAAAAAABIVhTCKIwDQYJKoZIhvcNAQELBQAwTDEgMB4G"
@@ -69,13 +70,16 @@ void mqtt_event_callback(void *event_handler_arg,
             .result_code = 0,
             .response_name = "COMMAND_RESPONSE",
             .result = "success"};
-        char *command_response_json_str = hw_iot_mqtt_command_response_json(&command_response_json);
+        char request_id[128] = {0};
+        ESP_ERROR_CHECK(hw_iot_mqtt_topic_get_command_request_id(receive_data, request_id));         // 从 topic 中提取 request_id
+        char *command_response_json_str = hw_iot_mqtt_command_response_json(&command_response_json); // 生成命令响应 JSON 字符串
+        ESP_LOGI("mqtt_hw_iot", "request_id: %s", request_id);
         ESP_LOGI("mqtt_hw_iot", "command_response_json_str: %s", command_response_json_str);
 
-        if (strstr(receive_data->topic, "/sys/commands/"))
-        {
-            hw_iot_command_parse(receive_data);
-        }
+        // if (strstr(receive_data->topic, "/sys/commands/"))
+        // {
+        //     hw_iot_command_parse(receive_data);
+        // }
         break;
     default:
         break;
