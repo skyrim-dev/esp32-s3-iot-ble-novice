@@ -79,6 +79,7 @@ void mqtt_event_callback(void *event_handler_arg,
         if (hw_iot_mqtt_topic_get_command_request_id(receive_data, request_id) != ESP_OK) // 从 topic 中提取 request_id
         {
             ESP_LOGW("mqtt_hw_iot", "Failed to get request_id from topic");
+            command_response_json.result_code = 1;  // 作失败处理
             return;
         }
         char *command_response_topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_COMMAND_RESPONSE, HW_IOT_DEVICE_ID, request_id); // 获取命令响应 topic

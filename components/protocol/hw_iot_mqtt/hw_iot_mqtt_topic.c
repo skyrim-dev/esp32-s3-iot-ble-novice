@@ -6,7 +6,7 @@
 #include "hw_iot_mqtt_topic.h"
 #include "hw_iot_mqtt_config.h"
 
-static char topic_str[128] = {0};
+static char topic_str[256] = {0};
 
 /**
  * @brief 获取华为云IoT平台的MQTT主题字符串

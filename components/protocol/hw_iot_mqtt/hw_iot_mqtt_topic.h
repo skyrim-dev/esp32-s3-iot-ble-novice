@@ -3,8 +3,6 @@
 
 #include <mqtt_client.h>
 
-
-
 typedef enum
 {
     HW_IOT_TOPIC_PROPERTIES_REPORT = 0, /**< 属性上报 $oc/devices/{device_id}/sys/properties/report*/
