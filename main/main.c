@@ -8,7 +8,7 @@
 #include "hw_iot_mqtt.h"
 #include "wifi.h"
 #include "hw_iot_mqtt_topic.h"
-#include "hw_iot_mqtt_json.h"
+#include "json_util.h"
 
 static void led_init(void)
 {

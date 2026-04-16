@@ -9,7 +9,7 @@
 #include <cJSON.h>
 
 #include "hw_iot_mqtt.h"
-#include "hw_iot_mqtt_json.h"
+#include "json_util.h"
 #include "hw_iot_mqtt_topic.h"
 
 static const char *hw_iot_cert = "-----BEGIN CERTIFICATE-----\n"
