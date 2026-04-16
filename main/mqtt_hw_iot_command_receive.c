@@ -123,10 +123,10 @@ void hw_iot_command_receive_ack(char *request_id)
         return;
     }
 
-    char *topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_ACK_RESPONSE, HW_IOT_USERNAME, request_id);
+    char *topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_COMMAND_RESPONSE, HW_IOT_USERNAME, request_id);
     if (!topic)
     {
-        ESP_LOGE(TAG, "Failed to get ACK response topic");
+        ESP_LOGE(TAG, "Failed to get command response topic");
         cJSON_free(json_str);
         cJSON_Delete(response_json);
         return;

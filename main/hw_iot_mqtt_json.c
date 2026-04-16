@@ -119,3 +119,4 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
 
     return js_str;
 }
+
