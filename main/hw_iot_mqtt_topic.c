@@ -66,18 +66,17 @@ char *hw_iot_mqtt_topic_get(hw_iot_topic_type_t type, char *device_id, char *req
     return topic_str;
 }
 
-char *hw_iot_mqtt_topic_get_command_request_id(esp_mqtt_event_handle_t receive_data)
+int hw_iot_mqtt_topic_get_command_request_id(esp_mqtt_event_handle_t receive_data, char *request_id)
 {
     if (!receive_data || !strstr(receive_data->topic, "sys/commands/request_id="))
     {
         ESP_LOGE("mqtt_hw_iot", "Invalid command topic");
-        return NULL;
+        return ESP_FAIL;
     }
 
     ESP_LOGI("mqtt_hw_iot", "receive command, topic: %.*s", receive_data->topic_len, receive_data->topic);
 
     char topic[96] = {0};
-    char request_id[48] = {0};
     int copy_len = (receive_data->topic_len < sizeof(topic) - 1)
                        ? receive_data->topic_len
                        : sizeof(topic) - 1;       // 计算要复制的长度，确保不超过缓冲区大小
@@ -96,5 +95,5 @@ char *hw_iot_mqtt_topic_get_command_request_id(esp_mqtt_event_handle_t receive_d
             ESP_LOGI("mqtt_hw_iot", "request_id: %s", request_id);
         }
     }
-    return request_id;
+    return ESP_OK;
 }
