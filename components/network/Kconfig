@@ -1,0 +1,32 @@
+# WiFi Configuration
+
+menu "WiFi Configuration"
+
+    config WIFI_SSID
+        string "WiFi SSID"
+        default "MyWiFi"
+        help
+            SSID (network name) for the ESP32 to connect to.
+
+    config WIFI_PASSWORD
+        string "WiFi Password"
+        default "password"
+        help
+            WiFi password (WPA or WPA2) for the ESP32 to use.
+
+    config WIFI_CONNECT_TIMEOUT_MS
+        int "WiFi connect timeout (ms)"
+        default 30000
+        range 5000 120000
+        help
+            Timeout in milliseconds for WiFi connection.
+            If the ESP32 fails to connect within this time, it will retry.
+
+    config WIFI_RECONNECT_INTERVAL_MS
+        int "WiFi reconnect interval (ms)"
+        default 5000
+        range 1000 60000
+        help
+            Interval in milliseconds between WiFi reconnection attempts.
+
+endmenu

@@ -21,3 +21,7 @@ dependencies.lock
 
 # index files (clangd, partition tables, etc.)
 *.idx
+
+# ESP-IDF sdkconfig (local configuration)
+sdkconfig
+sdkconfig.old
