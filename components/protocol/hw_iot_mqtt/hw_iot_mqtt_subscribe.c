@@ -12,7 +12,7 @@ hw_iot_mqtt_subscribe_type_t hw_iot_mqtt_subscribe_type(esp_mqtt_event_handle_t 
 {
     if (!receive_data)
     {
-        ESP_LOGE("mqtt_hw_iot", "Invalid event handle");
+        ESP_LOGE("hw_iot_mqtt_subscribe_type", "Invalid event handle");
         return -1;
     }
 
@@ -54,41 +54,43 @@ int hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_m
 {
     if (subscribe_type == HW_IOT_MQTT_SUBSCRIBE_TYPE_INVALID)
     {
-        ESP_LOGE("mqtt_hw_iot", "Invalid subscribe type");
+        ESP_LOGE("hw_iot_mqtt_subscribe_ack", "Invalid subscribe type");
         return ESP_FAIL;
     }
     switch (subscribe_type)
     {
     case HW_IOT_MQTT_MESSAGE_SUBSCRIBE:
-
+        ESP_LOGI("hw_iot_mqtt_subscribe_ack", "Message subscribe ack");
         break;
     case HW_IOT_MQTT_COMMAND_SUBSCRIBE:
+        ESP_LOGI("hw_iot_mqtt_subscribe_ack", "Command subscribe ack");
         char request_id[128] = {0};                                                                                                               // 命令请求 ID
         hw_iot_mqtt_command_response_json_t command_response_json = {.result_code = 0, .response_name = "COMMAND_RESPONSE", .result = "success"}; // 命令响应 JSON 结构体
         if (hw_iot_mqtt_topic_get_command_request_id(receive_data, request_id) != ESP_OK)                                                         // 从 topic 中提取 request_id
         {
-            ESP_LOGW("mqtt_hw_iot", "Failed to get request_id from topic");
+            ESP_LOGW("hw_iot_mqtt_subscribe_ack", "Failed to get request_id from topic");
             command_response_json.result_code = 1; // 作失败处理
             return ESP_FAIL;
         }
         char *command_response_topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_COMMAND_RESPONSE, HW_IOT_DEVICE_ID, request_id); // 获取命令响应 topic
         if (command_response_topic == NULL)
         {
-            ESP_LOGW("mqtt_hw_iot", "Failed to get command_response_topic");
+            ESP_LOGW("hw_iot_mqtt_subscribe_ack", "Failed to get command_response_topic");
             command_response_json.result_code = 1; // 作失败处理
             return ESP_FAIL;
         }
         char *command_response_json_str = hw_iot_mqtt_command_response_json(&command_response_json); // 生成命令响应 JSON 字符串
-        ESP_LOGI("mqtt_hw_iot", "request_id: %s", request_id);
-        ESP_LOGI("mqtt_hw_iot", "command_response_topic: %s", command_response_topic);
-        ESP_LOGI("mqtt_hw_iot", "command_response_json_str: %s", command_response_json_str);
+        ESP_LOGI("hw_iot_mqtt_subscribe_ack", "request_id: %s", request_id);
+        ESP_LOGI("hw_iot_mqtt_subscribe_ack", "command_response_topic: %s", command_response_topic);
+        ESP_LOGI("hw_iot_mqtt_subscribe_ack", "command_response_json_str: %s", command_response_json_str);
         hw_iot_mqtt_publish(command_response_topic, command_response_json_str); // 发布命令响应
         free(command_response_json_str);
         break;
     case HW_IOT_MQTT_VERSION_QUERY_SUBSCRIBE:
-
+        ESP_LOGI("hw_iot_mqtt_subscribe_ack", "Version query subscribe ack");
         break;
     case HW_IOT_MQTT_FIRMWARE_UPGRADE_SUBSCRIBE:
+        ESP_LOGI("hw_iot_mqtt_subscribe_ack", "Firmware upgrade subscribe ack");
         break;
     default:
         break;

@@ -188,11 +188,11 @@ char *cJSON_UnformattedFree(cJSON *root_js)
     char *js_str = cJSON_PrintUnformatted(root_js); // 生成 JSON 字符串，不包含格式化字符
     if (!js_str)
     {
-        ESP_LOGE("hw_iot_mqtt_properties_report_json", "cJSON_PrintUnformatted failed");
+        ESP_LOGE("cJSON_UnformattedFree", "cJSON_PrintUnformatted failed");
         cJSON_Delete(root_js);
         return NULL;
     }
-    ESP_LOGI("hw_iot_mqtt_properties_report_json", "Generated JSON for service(s): %s", js_str);
+    ESP_LOGI("cJSON_UnformattedFree", "Generated JSON for service(s): %s", js_str);
 
     cJSON_Delete(root_js); // 释放根 json 对象
 

@@ -30,13 +30,13 @@ int hw_iot_mqtt_publish(char *topic, char *json_str)
 {
     if (!topic || !json_str || strlen(json_str) <= 0) // 参数为空
     {
-        ESP_LOGE("mqtt_hw_iot", "Invalid message data");
+        ESP_LOGE("hw_iot_mqtt_publish", "Invalid message data");
         return -1;
     }
 
     if (!mqtt_handle) // 因为 mqtt_handle 是全局变量，所以可以检测 mqtt 客户端是否初始化
     {
-        ESP_LOGE("mqtt_hw_iot", "MQTT client not initialized");
+        ESP_LOGE("hw_iot_mqtt_publish", "MQTT client not initialized");
         return -1;
     }
 
@@ -44,12 +44,12 @@ int hw_iot_mqtt_publish(char *topic, char *json_str)
     int msg_id = esp_mqtt_client_publish(mqtt_handle, topic, json_str, strlen(json_str), 0, 0);
     if (msg_id < 0) // 发布消息失败
     {
-        ESP_LOGE("mqtt_hw_iot", "Failed to publish message, msg_id=%d", msg_id);
+        ESP_LOGE("hw_iot_mqtt_publish", "Failed to publish message, msg_id=%d", msg_id);
         return -1;
     }
 
-    ESP_LOGI("mqtt_hw_iot", "Properties reported, topic: %s, msg_id: %d", topic, msg_id);
-    ESP_LOGI("mqtt_hw_iot", "Payload: %s", json_str);
+    ESP_LOGI("hw_iot_mqtt_publish", "Properties reported, topic: %s, msg_id: %d", topic, msg_id);
+    ESP_LOGI("hw_iot_mqtt_publish", "Payload: %s", json_str);
 
     return 0;
 }
