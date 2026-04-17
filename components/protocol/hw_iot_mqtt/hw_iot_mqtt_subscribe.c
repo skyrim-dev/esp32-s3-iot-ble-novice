@@ -27,22 +27,32 @@ hw_iot_mqtt_subscribe_type_t hw_iot_mqtt_subscribe_type(esp_mqtt_event_handle_t 
     memcpy(json_payload, receive_data->data, data_len);
     json_payload[data_len] = '\0';
 
+    ESP_LOGI("hw_iot_mqtt_subscribe_type", "topic length: %d", receive_data->topic_len);
+    ESP_LOGI("hw_iot_mqtt_subscribe_type", "data length: %d", receive_data->data_len);
+    ESP_LOGI("hw_iot_mqtt_subscribe_type", "topic: %.*s", receive_data->topic_len, topic);
+    ESP_LOGI("hw_iot_mqtt_subscribe_type", "data: %.*s", receive_data->data_len, json_payload);
+
     if (strstr(topic, "sys/messages/down")) // 消息主题
     {
+        ESP_LOGI("hw_iot_mqtt_subscribe_type", "Message subscribe");
         return HW_IOT_MQTT_MESSAGE_SUBSCRIBE;
     }
     else if (strstr(topic, "sys/commands/request_id=")) // 命令主题
     {
+        ESP_LOGI("hw_iot_mqtt_subscribe_type", "Command subscribe");
         return HW_IOT_MQTT_COMMAND_SUBSCRIBE;
     }
-    else if (strstr(json_payload, "\"service_id\": \"$ota\"") && strstr(topic, "sys/events/down")) // OTA服务主题
+    else if (strstr(json_payload, "$ota") && strstr(topic, "sys/events/down")) // OTA服务主题
     {
-        if (strstr(json_payload, "\"event_type\": \"version_query\"")) // 版本查询事件
+        ESP_LOGI("hw_iot_mqtt_subscribe_type", "OTA subscribe");
+        if (strstr(json_payload, "version_query")) // 版本查询事件
         {
+            ESP_LOGI("hw_iot_mqtt_subscribe_type", "OTA: Version query subscribe");
             return HW_IOT_MQTT_VERSION_QUERY_SUBSCRIBE;
         }
-        else if (strstr(json_payload, "\"event_type\": \"firmware_upgrade\"")) // 固件升级事件
+        else if (strstr(json_payload, "firmware_upgrade")) // 固件升级事件
         {
+            ESP_LOGI("hw_iot_mqtt_subscribe_type", "OTA: Firmware upgrade subscribe");
             return HW_IOT_MQTT_FIRMWARE_UPGRADE_SUBSCRIBE;
         }
     }

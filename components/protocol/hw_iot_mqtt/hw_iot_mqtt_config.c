@@ -72,8 +72,8 @@ void mqtt_event_callback(void *event_handler_arg,
         ESP_LOGI("mqtt_event_callback", "data length: %d", receive_data->data_len);
         ESP_LOGI("mqtt_event_callback", "topic: %.*s", receive_data->topic_len, receive_data->topic);
         ESP_LOGI("mqtt_event_callback", "data: %.*s", receive_data->data_len, receive_data->data);
-        int subscribe_type = 0;
-        subscribe_type = hw_iot_mqtt_subscribe_type(receive_data);
+        /* 处理订阅确认 */
+        hw_iot_mqtt_subscribe_type_t subscribe_type = hw_iot_mqtt_subscribe_type(receive_data);
         ESP_LOGI("mqtt_event_callback", "subscribe_type: %d", subscribe_type);
         if (hw_iot_mqtt_subscribe_ack(subscribe_type, receive_data) != ESP_OK)
         {
