@@ -1,5 +1,5 @@
-#ifndef HW_IOT_MQTT_CONFIG_H
-#define HW_IOT_MQTT_CONFIG_H
+#ifndef HW_IOT_MQTT_CLIENT_H
+#define HW_IOT_MQTT_CLIENT_H
 
 #include <mqtt_client.h>
 

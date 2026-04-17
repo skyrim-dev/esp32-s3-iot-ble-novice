@@ -5,7 +5,7 @@
 #include "hw_iot_mqtt_subscribe.h"
 #include "hw_iot_mqtt_json.h"
 #include "hw_iot_mqtt_topic.h"
-#include "hw_iot_mqtt_config.h"
+#include "hw_iot_mqtt_client.h"
 #include "hw_iot_mqtt_publish.h"
 
 hw_iot_mqtt_subscribe_type_t hw_iot_mqtt_subscribe_type(esp_mqtt_event_handle_t receive_data)

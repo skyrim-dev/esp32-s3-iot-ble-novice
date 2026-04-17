@@ -2,7 +2,7 @@
 #include <mqtt_client.h>
 
 #include "hw_iot_mqtt_publish.h"
-#include "hw_iot_mqtt_config.h"
+#include "hw_iot_mqtt_client.h"
 #include "hw_iot_mqtt_topic.h"
 #include "hw_iot_mqtt_json.h"
 
