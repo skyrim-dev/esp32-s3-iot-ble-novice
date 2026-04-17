@@ -13,7 +13,7 @@ hw_iot_mqtt_subscribe_type_t hw_iot_mqtt_subscribe_type(esp_mqtt_event_handle_t 
     if (!receive_data)
     {
         ESP_LOGE("hw_iot_mqtt_subscribe_type", "Invalid event handle");
-        return -1;
+        return HW_IOT_MQTT_SUBSCRIBE_TYPE_INVALID;
     }
 
     char topic[256] = {0};
@@ -47,7 +47,7 @@ hw_iot_mqtt_subscribe_type_t hw_iot_mqtt_subscribe_type(esp_mqtt_event_handle_t 
         }
     }
 
-    return -1;
+    return HW_IOT_MQTT_SUBSCRIBE_TYPE_INVALID;
 }
 
 int hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_mqtt_event_handle_t receive_data)
