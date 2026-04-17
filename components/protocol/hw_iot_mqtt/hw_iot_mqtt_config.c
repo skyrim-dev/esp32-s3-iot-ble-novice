@@ -8,6 +8,7 @@
 #include "hw_iot_mqtt_config.h"
 #include "hw_iot_mqtt_json.h"
 #include "hw_iot_mqtt_topic.h"
+#include "hw_iot_mqtt_subscribe.h"
 
 extern const char _binary_cert_pem_start[] asm("_binary_cert_pem_start");
 extern const char _binary_cert_pem_end[] asm("_binary_cert_pem_end");
@@ -70,29 +71,12 @@ void mqtt_event_callback(void *event_handler_arg,
         ESP_LOGI("mqtt_hw_iot", "data length: %d", receive_data->data_len);
         ESP_LOGI("mqtt_hw_iot", "topic: %.*s", receive_data->topic_len, receive_data->topic);
         ESP_LOGI("mqtt_hw_iot", "data: %.*s", receive_data->data_len, receive_data->data);
-        /* 测试命令响应 */
-        hw_iot_mqtt_command_response_json_t command_response_json = {
-            .result_code = 0,
-            .response_name = "COMMAND_RESPONSE",
-            .result = "success"};
-        char request_id[128] = {0};
-        if (hw_iot_mqtt_topic_get_command_request_id(receive_data, request_id) != ESP_OK) // 从 topic 中提取 request_id
+        int subscribe_type = 0;
+        subscribe_type = hw_iot_mqtt_subscribe_type(receive_data);
+        if (hw_iot_mqtt_subscribe_ack(subscribe_type, receive_data) != ESP_OK)
         {
-            ESP_LOGW("mqtt_hw_iot", "Failed to get request_id from topic");
-            command_response_json.result_code = 1; // 作失败处理
-            return;
+            ESP_LOGE("mqtt_hw_iot", "Failed to subscribe ack");
         }
-        char *command_response_topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_COMMAND_RESPONSE, HW_IOT_DEVICE_ID, request_id); // 获取命令响应 topic
-        if (command_response_topic == NULL)
-        {
-            command_response_json.result_code = 1; // 作失败处理
-        }
-        char *command_response_json_str = hw_iot_mqtt_command_response_json(&command_response_json); // 生成命令响应 JSON 字符串
-        ESP_LOGI("mqtt_hw_iot", "request_id: %s", request_id);
-        ESP_LOGI("mqtt_hw_iot", "command_response_topic: %s", command_response_topic);
-        ESP_LOGI("mqtt_hw_iot", "command_response_json_str: %s", command_response_json_str);
-        hw_iot_mqtt_report(command_response_topic, command_response_json_str); // 发布命令响应
-        free(command_response_json_str);
         break;
     default:
         break;
@@ -121,7 +105,7 @@ void mqtt_event_callback(void *event_handler_arg,
  *       6. 适用于属性上报、命令响应等MQTT消息发布场景
  *       7. 日志标签使用"mqtt_hw_iot"
  */
-int hw_iot_mqtt_report(char *topic, char *json_str)
+int hw_iot_mqtt_publish(char *topic, char *json_str)
 {
     if (!topic || !json_str || strlen(json_str) <= 0) // 参数为空
     {

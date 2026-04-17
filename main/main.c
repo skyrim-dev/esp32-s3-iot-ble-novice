@@ -42,6 +42,6 @@ void app_main(void)
     char *topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_PROPERTIES_REPORT, HW_IOT_DEVICE_ID, NULL);
     char *json_str = hw_iot_mqtt_properties_report_json(&json);
     ESP_LOGI("main", "topic: %s, json_str: %s", topic, json_str);
-    hw_iot_mqtt_report(topic, json_str);
+    hw_iot_mqtt_publish(topic, json_str);
     free(json_str);
 }
