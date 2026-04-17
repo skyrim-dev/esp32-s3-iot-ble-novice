@@ -11,6 +11,5 @@ typedef enum
 } hw_iot_mqtt_subscribe_type_t;
 
 hw_iot_mqtt_subscribe_type_t hw_iot_mqtt_subscribe_type(esp_mqtt_event_handle_t receive_data);
-int hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_mqtt_event_handle_t receive_data);
 
 #endif
