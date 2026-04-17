@@ -12,6 +12,7 @@
 #include "hw_iot_mqtt_topic.h"
 #include "hw_iot_mqtt_subscribe.h"
 #include "hw_iot_mqtt_publish.h"
+#include "hw_iot_ota.h"
 
 extern const char _binary_cert_pem_start[] asm("_binary_cert_pem_start");
 extern const char _binary_cert_pem_end[] asm("_binary_cert_pem_end");
@@ -47,10 +48,9 @@ void mqtt_event_callback(void *event_handler_arg,
         ESP_LOGI(TAG, "data length: %d", receive_data->data_len);
         ESP_LOGI(TAG, "topic: %.*s", receive_data->topic_len, receive_data->topic);
         ESP_LOGI(TAG, "data: %.*s", receive_data->data_len, receive_data->data);
-        /* 处理订阅确认 */
-        hw_iot_mqtt_subscribe_type_t subscribe_type = hw_iot_mqtt_subscribe_type(receive_data);
+        hw_iot_mqtt_subscribe_type_t subscribe_type = hw_iot_mqtt_subscribe_type(receive_data); // 获取订阅类型
         ESP_LOGI(TAG, "subscribe_type: %d", subscribe_type);
-        if (hw_iot_mqtt_subscribe_ack_public(subscribe_type, receive_data) != ESP_OK)
+        if (hw_iot_mqtt_subscribe_ack(subscribe_type, receive_data) != ESP_OK) // 处理订阅确认
         {
             ESP_LOGE(TAG, "Failed to subscribe ack");
         }
@@ -60,7 +60,7 @@ void mqtt_event_callback(void *event_handler_arg,
     }
 }
 
-esp_err_t hw_iot_mqtt_subscribe_ack_public(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_mqtt_event_handle_t receive_data)
+esp_err_t hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_mqtt_event_handle_t receive_data)
 {
     char *TAG = "hw_iot_mqtt_subscribe_ack";
     if (!receive_data)
@@ -96,8 +96,54 @@ esp_err_t hw_iot_mqtt_subscribe_ack_public(hw_iot_mqtt_subscribe_type_t subscrib
             return ESP_FAIL;
         }
         break;
-    case HW_IOT_MQTT_FIRMWARE_UPGRADE_SUBSCRIBE:
+    case HW_IOT_MQTT_SFW_UPGRADE_SUBSCRIBE:
         ESP_LOGI(TAG, "Firmware upgrade subscribe ack");
+        cJSON *ota_js = cJSON_Parse(receive_data->data); // 解析平台下发的JSON数据
+        if (!ota_js)
+        {
+            ESP_LOGE(TAG, "cJSON_Parse failed");
+            return ESP_FAIL;
+        }
+        cJSON *services_js = cJSON_GetObjectItem(ota_js, "services"); // 提取services数组
+        if (!services_js || !cJSON_IsArray(services_js) || cJSON_GetArraySize(services_js) == 0)
+        {
+            ESP_LOGE(TAG, "services invalid");
+            cJSON_Delete(ota_js);
+            return ESP_FAIL;
+        }
+        cJSON *service_obj = cJSON_GetArrayItem(services_js, 0); // 提取services数组的第一个元素
+        if (!service_obj || !cJSON_IsObject(service_obj))
+        {
+            ESP_LOGE(TAG, "service[0] invalid");
+            cJSON_Delete(ota_js);
+            return ESP_FAIL;
+        }
+        cJSON *paras_js = cJSON_GetObjectItem(service_obj, "paras"); // 提取paras对象
+        if (!paras_js || !cJSON_IsObject(paras_js))
+        {
+            ESP_LOGE(TAG, "paras invalid");
+            cJSON_Delete(ota_js);
+            return ESP_FAIL;
+        }
+        cJSON *url_js = cJSON_GetObjectItem(paras_js, "url"); // 提取url字符串
+        if (!url_js || !cJSON_IsString(url_js) || url_js->valuestring == NULL)
+        {
+            ESP_LOGE(TAG, "url invalid");
+            cJSON_Delete(ota_js);
+            return ESP_FAIL;
+        }
+        cJSON *access_token_js = cJSON_GetObjectItem(paras_js, "access_token"); // 提取access_token字符串
+        if (!access_token_js || !cJSON_IsString(access_token_js) || access_token_js->valuestring == NULL)
+        {
+            ESP_LOGE(TAG, "access_token invalid");
+            cJSON_Delete(ota_js);
+            return ESP_FAIL;
+        }
+        ESP_LOGI(TAG, "OTA URL: %s", url_js->valuestring);
+        ESP_LOGI(TAG, "OTA access_token: %s", access_token_js->valuestring);
+        hw_iot_ota_init(url_js->valuestring, access_token_js->valuestring, hw_iot_ota_callback);
+        hw_iot_ota_start();
+        cJSON_Delete(ota_js);
         break;
     default:
         break;

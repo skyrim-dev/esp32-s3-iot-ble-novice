@@ -51,10 +51,10 @@ hw_iot_mqtt_subscribe_type_t hw_iot_mqtt_subscribe_type(esp_mqtt_event_handle_t 
             ESP_LOGI(TAG, "OTA: Version query subscribe");
             return HW_IOT_MQTT_VERSION_QUERY_SUBSCRIBE;
         }
-        else if (strstr(json_payload, "firmware_upgrade")) // 固件升级事件
+        else if (strstr(json_payload, "firmware_upgrade")) // 软/固件升级事件
         {
             ESP_LOGI(TAG, "OTA: Firmware upgrade subscribe");
-            return HW_IOT_MQTT_FIRMWARE_UPGRADE_SUBSCRIBE;
+            return HW_IOT_MQTT_SFW_UPGRADE_SUBSCRIBE;
         }
     }
 
