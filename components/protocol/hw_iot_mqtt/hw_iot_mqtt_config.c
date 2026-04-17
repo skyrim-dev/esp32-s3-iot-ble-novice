@@ -9,6 +9,7 @@
 #include "hw_iot_mqtt_json.h"
 #include "hw_iot_mqtt_topic.h"
 #include "hw_iot_mqtt_subscribe.h"
+#include "hw_iot_mqtt_publish.h"
 
 extern const char _binary_cert_pem_start[] asm("_binary_cert_pem_start");
 extern const char _binary_cert_pem_end[] asm("_binary_cert_pem_end");
@@ -76,10 +77,21 @@ void mqtt_event_callback(void *event_handler_arg,
         /* 处理订阅确认 */
         hw_iot_mqtt_subscribe_type_t subscribe_type = hw_iot_mqtt_subscribe_type(receive_data);
         ESP_LOGI(TAG, "subscribe_type: %d", subscribe_type);
-        if (hw_iot_mqtt_subscribe_ack(subscribe_type, receive_data) != ESP_OK)
+        if (subscribe_type == HW_IOT_MQTT_COMMAND_SUBSCRIBE) // 命令订阅
         {
-            ESP_LOGE(TAG, "Failed to subscribe ack");
+            if (hw_iot_mqtt_subscribe_ack(subscribe_type, receive_data) != ESP_OK)
+            {
+                ESP_LOGE(TAG, "Failed to subscribe ack");
+            }
         }
+        else if (subscribe_type == HW_IOT_MQTT_VERSION_QUERY_SUBSCRIBE) // OTA版本查询订阅
+        {
+            if (hw_iot_mqtt_ota_version_publish() != ESP_OK)
+            {
+                ESP_LOGE(TAG, "Failed to report version");
+            }
+        }
+
         break;
     default:
         break;

@@ -51,8 +51,8 @@ int hw_iot_mqtt_publish(char *topic, char *json_str)
         return ESP_FAIL;
     }
 
-    ESP_LOGI(TAG, "Properties reported, topic: %s, msg_id: %d", topic, msg_id);
-    ESP_LOGI(TAG, "Payload: %s", json_str);
+    // ESP_LOGI(TAG, "topic: %s", topic);
+    // ESP_LOGI(TAG, "Payload: %s", json_str);
 
     return ESP_OK;
 }
@@ -67,7 +67,6 @@ int hw_iot_mqtt_properties_publish(void)
         }};
     char *topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_PROPERTIES_REPORT, HW_IOT_DEVICE_ID, NULL);
     char *json_str = hw_iot_mqtt_properties_report_json(&json);
-    ESP_LOGI(TAG, "topic: %s, json_str: %s", topic, json_str);
     if (hw_iot_mqtt_publish(topic, json_str) != ESP_OK)
     {
         ESP_LOGE(TAG, "Failed to publish properties report");
@@ -77,9 +76,9 @@ int hw_iot_mqtt_properties_publish(void)
     return ESP_OK;
 }
 
-int hw_iot_mqtt_ota_version_report(void)
+int hw_iot_mqtt_ota_version_publish(void)
 {
-    const char *TAG = "hw_iot_mqtt_ota_version_report";
+    const char *TAG = "hw_iot_mqtt_ota_version_publish";
     hw_iot_mqtt_firmware_version_json_t json = {
         .object_device_id = HW_IOT_DEVICE_ID,
         .sw_version = "1.0.0",
@@ -87,7 +86,6 @@ int hw_iot_mqtt_ota_version_report(void)
     };
     char *topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_OTA_VERSION_REPORT, HW_IOT_DEVICE_ID, NULL);
     char *json_str = hw_iot_mqtt_ota_version_report_json(&json);
-    ESP_LOGI(TAG, "topic: %s, json_str: %s", topic, json_str);
     if (hw_iot_mqtt_publish(topic, json_str) != ESP_OK)
     {
         ESP_LOGE(TAG, "Failed to publish firmware version report");

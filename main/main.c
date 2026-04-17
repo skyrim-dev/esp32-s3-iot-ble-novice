@@ -37,6 +37,4 @@ void app_main(void)
 
     /* mqtt发布属性 */
     hw_iot_mqtt_properties_publish();
-    /* mqtt发布OTA版本报告 */
-    hw_iot_mqtt_ota_version_report();
 }
