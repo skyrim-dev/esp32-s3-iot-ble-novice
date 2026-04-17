@@ -6,28 +6,6 @@
 #include "hw_iot_mqtt_topic.h"
 #include "hw_iot_mqtt_json.h"
 
-/**
- * @brief 发布MQTT消息到华为云IoT平台
- *
- * 该函数用于向华为云IoT平台发布MQTT消息，支持属性上报、命令响应等场景。
- * 消息以QoS=0的级别发布，即最多一次传输，不保证到达。
- *
- * @param topic MQTT主题字符串，指定消息发布的目标主题
- *              例如："$oc/devices/{device_id}/sys/properties/report"
- * @param json_str JSON格式的消息载荷字符串，包含要发送的数据
- *                  例如：{"services": [{"service_id": "xxx", "properties": {...}}]}
- *
- * @return int 成功返回0，失败返回-1
- *
- * @note
- *       1. 函数会检查topic和json_str参数的有效性，任一为空则返回失败
- *       2. 函数会检查MQTT客户端是否已初始化，未初始化则返回失败
- *       3. 消息以QoS=0级别发布，不保证消息可靠到达
- *       4. 发布成功后会记录消息ID和完整载荷到日志
- *       5. 发布失败会记录错误日志，包含失败的消息ID
- *       6. 适用于属性上报、命令响应等MQTT消息发布场景
- *       7. 日志标签使用"mqtt_hw_iot"
- */
 int hw_iot_mqtt_publish(char *topic, char *json_str)
 {
     char *TAG = "hw_iot_mqtt_publish";
@@ -51,8 +29,8 @@ int hw_iot_mqtt_publish(char *topic, char *json_str)
         return ESP_FAIL;
     }
 
-    // ESP_LOGI(TAG, "topic: %s", topic);
-    // ESP_LOGI(TAG, "Payload: %s", json_str);
+    ESP_LOGI(TAG, "topic: %s", topic);
+    ESP_LOGI(TAG, "Payload: %s", json_str);
 
     return ESP_OK;
 }

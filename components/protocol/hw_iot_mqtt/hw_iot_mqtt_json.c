@@ -6,28 +6,6 @@
 
 #include "hw_iot_mqtt_json.h"
 
-/**
- * @brief 生成华为云IoT平台属性上报的JSON字符串
- *
- * 该函数根据输入的服务和属性数据结构，生成符合华为云IoT平台要求的JSON格式字符串。
- * JSON结构为：{"services": [{"service_id": "xxx", "properties": {"key": value}, "event_time": "UTC时间"}]}
- *
- * @param json 指向hw_iot_mqtt_properties_report_json_t结构体的指针，包含需要上报的服务和属性数据
- *               - json[].service_id: 服务ID，为NULL时表示服务结束
- *               - json[].properties_id[]: 属性ID数组，为NULL时表示属性结束
- *               - json[].properties_value[]: 属性值数组，与properties_id一一对应
- *
- * @return char* 成功返回动态分配的JSON字符串指针，失败返回NULL
- *               注意：调用者需要在使用完毕后调用free()释放返回的字符串内存
- *
- * @note
- *       1. 函数内部会自动释放cJSON对象树，调用者只需负责释放返回的JSON字符串
- *       2. 时间格式使用华为云要求的UTC格式：YYYYMMDDThhmmssZ
- *       3. 生成的JSON字符串为无格式化版本，减少传输数据量
- *       4. 如果cJSON创建或序列化失败，函数会返回NULL并记录错误日志
- *       5. 支持动态服务数量，通过service_id为NULL判断结束
- *       6. 支持动态属性数量，通过properties_id为NULL判断结束
- */
 char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *json)
 {
     const char *TAG = "hw_iot_mqtt_properties_report_json";
@@ -113,26 +91,6 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
     return js_str;
 }
 
-/**
- * @brief 生成华为云IoT平台命令响应的JSON字符串
- *
- * 该函数根据输入的命令响应数据结构，生成符合华为云IoT平台要求的命令响应JSON格式字符串。
- * JSON结构为：{"result_code": xxx, "response_name": "xxx", "paras": {"result": "xxx"}}
- *
- * @param json 指向hw_iot_mqtt_command_response_json_t结构体的指针，包含命令响应数据
- *               - result_code: 响应结果码，0表示成功，非0表示失败
- *               - response_name: 响应名称字符串
- *               - result: 响应结果字符串
- *
- * @return char* 成功返回动态分配的JSON字符串指针，失败返回NULL
- *               注意：调用者需要在使用完毕后调用free()释放返回的字符串内存
- *
- * @note
- *       1. 函数内部会自动释放cJSON对象树，调用者只需负责释放返回的JSON字符串
- *       2. 生成的JSON字符串为无格式化版本，减少传输数据量
- *       3. 如果cJSON创建或序列化失败，函数会返回NULL并记录错误日志
- *       4. result_code通常使用0表示成功，其他值表示具体错误码
- */
 char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *json)
 {
     char *TAG = "hw_iot_mqtt_command_response_json";
@@ -221,7 +179,7 @@ char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_firmware_version_json_t *j
         cJSON_Delete(root_js);
         return NULL;
     }
-    cJSON_AddItemToObject(service_obj_js, "paras", paras_js); // 添加 paras 对象到服务对象
+    cJSON_AddItemToObject(service_obj_js, "paras", paras_js);          // 添加 paras 对象到服务对象
     cJSON_AddStringToObject(paras_js, "sw_version", json->sw_version); // 添加 sw_version 到 paras 对象
     cJSON_AddStringToObject(paras_js, "fw_version", json->fw_version); // 添加 fw_version 到 paras 对象
 
@@ -231,24 +189,6 @@ char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_firmware_version_json_t *j
     return js_str;
 }
 
-/**
- * @brief 将cJSON对象序列化为无格式JSON字符串并释放对象
- *
- * 该函数将cJSON对象树序列化为紧凑的JSON字符串（不包含空格和换行符），
- * 然后自动释放cJSON对象树的所有内存。
- *
- * @param root_js 指向要序列化的cJSON根对象的指针
- *
- * @return char* 成功返回动态分配的JSON字符串指针，失败返回NULL
- *               注意：调用者需要在使用完毕后调用free()释放返回的字符串内存
- *
- * @note
- *       1. 函数会自动释放cJSON对象树，调用者无需手动释放
- *       2. 生成的JSON字符串为无格式化版本，减少传输数据量
- *       3. 序列化成功后会记录生成的JSON字符串到日志
- *       4. 如果序列化失败，函数会释放cJSON对象并返回NULL
- *       5. 返回的字符串由cJSON库分配，必须由调用者释放
- */
 char *cJSON_UnformattedFree(cJSON *root_js)
 {
     char *TAG = "cJSON_UnformattedFree";

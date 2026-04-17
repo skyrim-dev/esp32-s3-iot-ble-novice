@@ -16,35 +16,6 @@ extern const char _binary_cert_pem_end[] asm("_binary_cert_pem_end");
 
 esp_mqtt_client_handle_t mqtt_handle = NULL;
 
-/**
- * @brief MQTT事件回调函数
- *
- * 该函数是ESP-IDF MQTT客户端的事件回调函数，用于处理各种MQTT事件。
- * 支持的事件类型包括：连接、断开、发布确认、订阅确认、数据接收等。
- *
- * @param event_handler_arg 事件处理器的用户参数，当前未使用
- * @param event_base 事件基础类型，用于区分不同的事件源
- * @param event_id 事件ID，标识具体的MQTT事件类型
- *                   - MQTT_EVENT_CONNECTED: 已连接到MQTT代理服务器
- *                   - MQTT_EVENT_DISCONNECTED: 已从MQTT代理服务器断开
- *                   - MQTT_EVENT_PUBLISHED: 消息发布确认
- *                   - MQTT_EVENT_SUBSCRIBED: 订阅确认
- *                   - MQTT_EVENT_UNSUBSCRIBED: 取消订阅确认
- *                   - MQTT_EVENT_DATA: 接收到MQTT消息数据
- * @param event_data 事件数据指针，类型为esp_mqtt_event_handle_t，包含MQTT事件的详细信息
- *                    - topic: 主题字符串
- *                    - topic_len: 主题长度
- *                    - data: 数据载荷
- *                    - data_len: 数据长度
- *
- * @note
- *       1. 该函数由ESP-IDF MQTT客户端在发生MQTT事件时自动调用
- *       2. 在MQTT_EVENT_DATA事件中，会自动提取request_id并发送命令响应
- *       3. 命令响应的result_code固定为0，表示成功
- *       4. 如果无法从topic中提取request_id，会记录错误日志并返回
- *       5. 函数内部会调用hw_iot_mqtt_report发送命令响应
- *       6. 日志标签使用"mqtt_hw_iot"
- */
 void mqtt_event_callback(void *event_handler_arg,
                          esp_event_base_t event_base,
                          int32_t event_id,
@@ -146,28 +117,6 @@ int hw_iot_mqtt_subscribe_ack_public(hw_iot_mqtt_subscribe_type_t subscribe_type
     return ESP_OK;
 }
 
-/**
- * @brief 初始化华为云IoT平台的MQTT客户端
- *
- * 该函数用于初始化并启动连接到华为云IoT平台的MQTT客户端。
- * 配置包括服务器地址、端口、认证信息和SSL证书等。
- *
- * @note
- *       1. 函数会从配置宏中读取连接参数：
- *          - HW_IOT_URI: MQTT服务器地址
- *          - HW_IOT_PORT: MQTT服务器端口
- *          - HW_IOT_CLIENT_ID: 客户端ID
- *          - HW_IOT_USERNAME: 用户名
- *          - HW_IOT_PASSWORD: 密码
- *       2. 使用SSL/TLS加密连接，需要提供服务器证书
- *       3. 证书使用GlobalSign Root CA证书
- *       4. 函数会注册mqtt_event_callback作为事件回调函数
- *       5. 函数会自动启动MQTT客户端，开始连接服务器
- *       6. 连接状态和事件会通过回调函数通知
- *       7. MQTT客户端句柄保存在全局变量mqtt_handle中
- *       8. 该函数应该在应用程序启动时调用一次
- *       9. 如果多次调用，可能会导致资源泄漏或异常
- */
 void hw_iot_mqtt_init(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {0};
