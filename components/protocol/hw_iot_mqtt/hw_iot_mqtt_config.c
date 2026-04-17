@@ -79,26 +79,12 @@ int hw_iot_mqtt_subscribe_ack_public(hw_iot_mqtt_subscribe_type_t subscribe_type
     case HW_IOT_MQTT_COMMAND_SUBSCRIBE:
         ESP_LOGI(TAG, "Command subscribe ack");
         char request_id[128] = {0};
-        hw_iot_mqtt_command_response_json_t command_response_json = {.result_code = 0, .response_name = "COMMAND_RESPONSE", .result = "success"}; // 命令响应 JSON 结构体
-        if (hw_iot_mqtt_topic_get_command_request_id(receive_data, request_id) != ESP_OK)                                                         // 从 topic 中提取 request_id
+        hw_iot_mqtt_topic_get_command_request_id(receive_data, request_id); // 从topic中提取request_id
+        if (hw_iot_mqtt_command_report(request_id) != ESP_OK)
         {
-            ESP_LOGW(TAG, "Failed to get request_id from topic");
-            command_response_json.result_code = 1; // 作失败处理
+            ESP_LOGE(TAG, "Failed to report command");
             return ESP_FAIL;
         }
-        char *command_response_topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_COMMAND_RESPONSE, HW_IOT_DEVICE_ID, request_id); // 获取命令响应 topic
-        if (command_response_topic == NULL)
-        {
-            ESP_LOGW(TAG, "Failed to get command_response_topic");
-            command_response_json.result_code = 1; // 作失败处理
-            return ESP_FAIL;
-        }
-        char *command_response_json_str = hw_iot_mqtt_command_response_json(&command_response_json); // 生成命令响应 JSON 字符串
-        ESP_LOGI(TAG, "request_id: %s", request_id);
-        ESP_LOGI(TAG, "command_response_topic: %s", command_response_topic);
-        ESP_LOGI(TAG, "command_response_json_str: %s", command_response_json_str);
-        hw_iot_mqtt_publish(command_response_topic, command_response_json_str); // 发布命令响应
-        free(command_response_json_str);
         break;
     case HW_IOT_MQTT_VERSION_QUERY_SUBSCRIBE:
         ESP_LOGI(TAG, "Version query subscribe ack");

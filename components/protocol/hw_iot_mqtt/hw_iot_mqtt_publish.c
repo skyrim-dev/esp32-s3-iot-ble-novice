@@ -35,7 +35,6 @@ int hw_iot_mqtt_publish(char *topic, char *json_str)
     return ESP_OK;
 }
 
-
 int hw_iot_mqtt_properties_publish(void)
 {
     const char *TAG = "hw_iot_mqtt_properties_publish";
@@ -51,6 +50,35 @@ int hw_iot_mqtt_properties_publish(void)
         return ESP_FAIL;
     }
     free(json_str);
+    return ESP_OK;
+}
+
+int hw_iot_mqtt_command_report(char *request_id)
+{
+    const char *TAG = "hw_iot_mqtt_command_report";
+    if (!request_id) // request_id 不能为空
+    {
+        ESP_LOGE(TAG, "Invalid request_id");
+        return ESP_FAIL;
+    }
+    hw_iot_mqtt_command_response_json_t command_response_json = {
+        .result_code = 0,
+        .response_name = "COMMAND_RESPONSE",
+        .result = "success",
+    };
+    char *command_response_topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_COMMAND_RESPONSE, HW_IOT_DEVICE_ID, request_id); // 获取命令响应 topic
+    if (command_response_topic == NULL)
+    {
+        ESP_LOGW(TAG, "Failed to get command_response_topic");
+        command_response_json.result_code = 1; // 作失败处理
+        return ESP_FAIL;
+    }
+    char *command_response_json_str = hw_iot_mqtt_command_response_json(&command_response_json); // 生成命令响应 JSON 字符串
+    ESP_LOGI(TAG, "request_id: %s", request_id);
+    ESP_LOGI(TAG, "command_response_topic: %s", command_response_topic);
+    ESP_LOGI(TAG, "command_response_json_str: %s", command_response_json_str);
+    hw_iot_mqtt_publish(command_response_topic, command_response_json_str); // 发布命令响应
+    free(command_response_json_str);
     return ESP_OK;
 }
 
