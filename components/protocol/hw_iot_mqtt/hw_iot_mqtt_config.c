@@ -4,6 +4,7 @@
 #include <esp_log.h>
 #include <mqtt_client.h>
 #include <cJSON.h>
+#include "esp_ota_ops.h"
 
 #include "hw_iot_mqtt_config.h"
 #include "hw_iot_mqtt_json.h"
