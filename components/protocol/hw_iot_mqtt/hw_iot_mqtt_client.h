@@ -2,6 +2,7 @@
 #define HW_IOT_MQTT_CLIENT_H
 
 #include <mqtt_client.h>
+#include <esp_err.h>
 
 #include "hw_iot_mqtt_subscribe.h"
 #include "sdkconfig.h"
@@ -28,7 +29,7 @@ void mqtt_event_callback(void *event_handler_arg,
                          esp_event_base_t event_base,
                          int32_t event_id,
                          void *event_data);
-int hw_iot_mqtt_subscribe_ack_public(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_mqtt_event_handle_t receive_data);
+esp_err_t hw_iot_mqtt_subscribe_ack_public(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_mqtt_event_handle_t receive_data);
 char *get_app_version(void);
 void hw_iot_mqtt_init(void);
 

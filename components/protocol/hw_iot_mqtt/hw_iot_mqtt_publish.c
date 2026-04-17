@@ -1,12 +1,13 @@
 #include <esp_log.h>
 #include <mqtt_client.h>
+#include <esp_err.h>
 
 #include "hw_iot_mqtt_publish.h"
 #include "hw_iot_mqtt_client.h"
 #include "hw_iot_mqtt_topic.h"
 #include "hw_iot_mqtt_json.h"
 
-int hw_iot_mqtt_publish(char *topic, char *json_str)
+esp_err_t hw_iot_mqtt_publish(char *topic, char *json_str)
 {
     char *TAG = "hw_iot_mqtt_publish";
     if (!topic || !json_str || strlen(json_str) <= 0) // 参数为空
@@ -35,7 +36,7 @@ int hw_iot_mqtt_publish(char *topic, char *json_str)
     return ESP_OK;
 }
 
-int hw_iot_mqtt_properties_publish(void)
+esp_err_t hw_iot_mqtt_properties_publish(void)
 {
     const char *TAG = "hw_iot_mqtt_properties_publish";
     hw_iot_mqtt_properties_report_json_t json = {
@@ -53,7 +54,7 @@ int hw_iot_mqtt_properties_publish(void)
     return ESP_OK;
 }
 
-int hw_iot_mqtt_command_report(char *request_id)
+esp_err_t hw_iot_mqtt_command_report(char *request_id)
 {
     const char *TAG = "hw_iot_mqtt_command_report";
     if (!request_id) // request_id 不能为空
@@ -82,7 +83,7 @@ int hw_iot_mqtt_command_report(char *request_id)
     return ESP_OK;
 }
 
-int hw_iot_mqtt_ota_version_publish(void)
+esp_err_t hw_iot_mqtt_ota_version_publish(void)
 {
     const char *TAG = "hw_iot_mqtt_ota_version_publish";
     hw_iot_mqtt_ota_response_version_json_t json = {

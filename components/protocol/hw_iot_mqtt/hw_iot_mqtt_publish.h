@@ -1,10 +1,11 @@
 #ifndef __HW_IOT_MQTT_PUBLISH_H__
 #define __HW_IOT_MQTT_PUBLISH_H__
 
-int hw_iot_mqtt_publish(char *topic, char *json_str);
-int hw_iot_mqtt_properties_publish(void);
-int hw_iot_mqtt_command_report(char *request_id);
-int hw_iot_mqtt_ota_version_publish(void);
+#include <esp_err.h>
+
+esp_err_t hw_iot_mqtt_publish(char *topic, char *json_str);
+esp_err_t hw_iot_mqtt_properties_publish(void);
+esp_err_t hw_iot_mqtt_command_report(char *request_id);
+esp_err_t hw_iot_mqtt_ota_version_publish(void);
 
 #endif
-

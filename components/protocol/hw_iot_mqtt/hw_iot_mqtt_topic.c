@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <esp_log.h>
+#include <esp_err.h>
 
 #include "hw_iot_mqtt_topic.h"
 #include "hw_iot_mqtt_client.h"
@@ -43,7 +44,7 @@ char *hw_iot_mqtt_topic_get(hw_iot_topic_type_t type, char *device_id, char *req
     return topic_str;
 }
 
-int hw_iot_mqtt_topic_get_command_request_id(esp_mqtt_event_handle_t receive_data, char *request_id)
+esp_err_t hw_iot_mqtt_topic_get_command_request_id(esp_mqtt_event_handle_t receive_data, char *request_id)
 {
     const char *TAG = "hw_iot_mqtt_topic_get_command_request_id";
     if (!receive_data || !strstr(receive_data->topic, "sys/commands/request_id="))

@@ -4,7 +4,8 @@
 #include <esp_log.h>
 #include <mqtt_client.h>
 #include <cJSON.h>
-#include "esp_ota_ops.h"
+#include <esp_ota_ops.h>
+#include <esp_err.h>
 
 #include "hw_iot_mqtt_client.h"
 #include "hw_iot_mqtt_json.h"
@@ -59,7 +60,7 @@ void mqtt_event_callback(void *event_handler_arg,
     }
 }
 
-int hw_iot_mqtt_subscribe_ack_public(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_mqtt_event_handle_t receive_data)
+esp_err_t hw_iot_mqtt_subscribe_ack_public(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_mqtt_event_handle_t receive_data)
 {
     char *TAG = "hw_iot_mqtt_subscribe_ack";
     if (!receive_data)
