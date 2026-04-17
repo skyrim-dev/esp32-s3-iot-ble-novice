@@ -2,6 +2,8 @@
 #define HW_IOT_MQTT_CONFIG_H
 
 #include <mqtt_client.h>
+
+#include "hw_iot_mqtt_subscribe.h"
 #include "sdkconfig.h"
 
 // ========== 华为云连接参数 ==========
@@ -26,7 +28,7 @@ void mqtt_event_callback(void *event_handler_arg,
                          esp_event_base_t event_base,
                          int32_t event_id,
                          void *event_data); // MQTT 事件回调函数
-int hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_mqtt_event_handle_t receive_data);
+int hw_iot_mqtt_subscribe_ack_public(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_mqtt_event_handle_t receive_data);
 void hw_iot_mqtt_init(void); // 初始化 MQTT 客户端并连接到华为云 IoT 平台
 
 #endif

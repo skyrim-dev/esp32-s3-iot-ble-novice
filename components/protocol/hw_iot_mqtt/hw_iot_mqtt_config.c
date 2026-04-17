@@ -48,7 +48,7 @@ void mqtt_event_callback(void *event_handler_arg,
         /* 处理订阅确认 */
         hw_iot_mqtt_subscribe_type_t subscribe_type = hw_iot_mqtt_subscribe_type(receive_data);
         ESP_LOGI(TAG, "subscribe_type: %d", subscribe_type);
-        if (hw_iot_mqtt_subscribe_ack(subscribe_type, receive_data) != ESP_OK)
+        if (hw_iot_mqtt_subscribe_ack_public(subscribe_type, receive_data) != ESP_OK)
         {
             ESP_LOGE(TAG, "Failed to subscribe ack");
         }
