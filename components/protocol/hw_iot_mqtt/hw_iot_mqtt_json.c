@@ -35,6 +35,7 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
         ESP_LOGE("hw_iot_mqtt_properties_report_json", "Input json pointer is NULL");
         return NULL;
     }
+
     /* 创建根 json 对象 */
     cJSON *root_js = cJSON_CreateObject(); // 创建根 json 对象
     if (!root_js)
@@ -138,6 +139,7 @@ char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *jso
         ESP_LOGE("hw_iot_mqtt_command_response_json", "Input json pointer is NULL");
         return NULL;
     }
+
     /* 创建根 json 对象 */
     cJSON *root_js = cJSON_CreateObject(); // 创建根 json 对象
     if (!root_js)
@@ -157,6 +159,69 @@ char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *jso
     }
     cJSON_AddItemToObject(root_js, "paras", paras_js);         // 添加 paras 对象到根 json 对象
     cJSON_AddStringToObject(paras_js, "result", json->result); // 添加 result 到 paras 对象
+
+    /* 将cJSON对象序列化为无格式JSON字符串 */
+    char *js_str = cJSON_UnformattedFree(root_js); // 生成 JSON 字符串，不包含格式化字符
+
+    return js_str;
+}
+
+char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_firmware_version_json_t *json)
+{
+    char *TAG = "hw_iot_mqtt_ota_version_report_json";
+    if (!json)
+    {
+        ESP_LOGE(TAG, "Input json pointer is NULL");
+        return NULL;
+    }
+
+    /* 创建根 json 对象 */
+    cJSON *root_js = cJSON_CreateObject(); // 创建根 json 对象
+    if (!root_js)
+    {
+        ESP_LOGE(TAG, "cJSON_CreateObject failed");
+        return NULL;
+    }
+
+    /* 创建 services 数组对象 */
+    cJSON *services_js = cJSON_CreateArray(); // 创建 services 数组对象
+    if (!services_js)
+    {
+        ESP_LOGE(TAG, "cJSON_CreateArray failed");
+        cJSON_Delete(root_js);
+        return NULL;
+    }
+    cJSON_AddItemToObject(root_js, "services", services_js); // 添加 services 对象到根 json 对象
+
+    cJSON *service_obj_js = cJSON_CreateObject(); // 创建 services 数组对象里的单个服务对象
+    if (!service_obj_js)
+    {
+        ESP_LOGE(TAG, "cJSON_CreateObject failed");
+        cJSON_Delete(root_js);
+        return NULL;
+    }
+    cJSON_AddItemToArray(services_js, service_obj_js); // 把对象加入数组
+
+    cJSON_AddStringToObject(service_obj_js, "service_id", "$ota");           // 添加 service_id 到服务对象，这里固定为$ota
+    cJSON_AddStringToObject(service_obj_js, "event_type", "version_report"); // 添加 event_type 到服务对象，这里固定为version_report
+
+    /* 获取当前UTC时间并格式化为华为云要求的格式 */
+    time_t now = time(NULL);                                         // 获取当前时间戳
+    struct tm *tm_info = gmtime(&now);                               // 获取UTC时间结构体
+    char time_buf[32];                                               // 用于存储格式化后的UTC时间字符串
+    strftime(time_buf, sizeof(time_buf), "%Y%m%dT%H%M%SZ", tm_info); // 格式化UTC时间字符串
+    cJSON_AddStringToObject(service_obj_js, "event_time", time_buf); // 添加 time 到服务对象
+
+    cJSON *paras_js = cJSON_CreateObject(); // 创建 paras 对象
+    if (!paras_js)
+    {
+        ESP_LOGE(TAG, "cJSON_CreateObject failed");
+        cJSON_Delete(root_js);
+        return NULL;
+    }
+    cJSON_AddItemToObject(service_obj_js, "paras", paras_js); // 添加 paras 对象到服务对象
+    cJSON_AddStringToObject(paras_js, "sw_version", json->sw_version); // 添加 sw_version 到 paras 对象
+    cJSON_AddStringToObject(paras_js, "fw_version", json->fw_version); // 添加 fw_version 到 paras 对象
 
     /* 将cJSON对象序列化为无格式JSON字符串 */
     char *js_str = cJSON_UnformattedFree(root_js); // 生成 JSON 字符串，不包含格式化字符

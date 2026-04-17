@@ -31,8 +31,19 @@ typedef struct
     char *result;        /* 命令的响应参数 */
 } hw_iot_mqtt_command_response_json_t;
 
+//=============================================================================//
+/* 设备上报软固件版本 */
+typedef struct
+{
+    char *object_device_id; /* 设备 ID */
+    char *event_time;       /* 事件时间 */
+    char *sw_version;       /* 软件版本 */
+    char *fw_version;       /* 固件版本 */
+} hw_iot_mqtt_firmware_version_json_t;
+
 char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *json); // 事件属性上报，服务结构体转换为 JSON 字符串
 char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *json);   // 命令确认响应，属性结构体转换为 JSON 字符串
-char *cJSON_UnformattedFree(cJSON *root_js);                                          //  将cJSON对象序列化为无格式JSON字符串并释放对象
+char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_firmware_version_json_t *json);     // 设备上报软固件版本，属性结构体转换为 JSON 字符串
+char *cJSON_UnformattedFree(cJSON *root_js);                                          // 将cJSON对象序列化为无格式JSON字符串并释放对象
 
 #endif

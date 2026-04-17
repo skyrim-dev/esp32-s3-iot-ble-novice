@@ -49,35 +49,36 @@ void mqtt_event_callback(void *event_handler_arg,
                          int32_t event_id,
                          void *event_data)
 {
+    const char *TAG = "mqtt_event_callback";
     esp_mqtt_event_handle_t receive_data = event_data;
     switch (event_id)
     {
     case MQTT_EVENT_CONNECTED: // 连接确认
-        ESP_LOGI("mqtt_event_callback", "Connected to broker");
+        ESP_LOGI(TAG, "Connected to broker");
         break;
     case MQTT_EVENT_DISCONNECTED: // 断开连接确认
-        ESP_LOGI("mqtt_event_callback", "Disconnected from broker");
+        ESP_LOGI(TAG, "Disconnected from broker");
         break;
     case MQTT_EVENT_PUBLISHED: // 消息发布确认
-        ESP_LOGI("mqtt_event_callback", "mqtt publish ack");
+        ESP_LOGI(TAG, "mqtt publish ack");
         break;
     case MQTT_EVENT_SUBSCRIBED: // 订阅确认
-        ESP_LOGI("mqtt_event_callback", "ESP32 Subscribed ack");
+        ESP_LOGI(TAG, "ESP32 Subscribed ack");
         break;
     case MQTT_EVENT_UNSUBSCRIBED: // 取消订阅确认
-        ESP_LOGI("mqtt_event_callback", "ESP32 Unsubscribed ack");
+        ESP_LOGI(TAG, "ESP32 Unsubscribed ack");
         break;
     case MQTT_EVENT_DATA: // 接收到MQTT消息数据
-        ESP_LOGI("mqtt_event_callback", "topic length: %d", receive_data->topic_len);
-        ESP_LOGI("mqtt_event_callback", "data length: %d", receive_data->data_len);
-        ESP_LOGI("mqtt_event_callback", "topic: %.*s", receive_data->topic_len, receive_data->topic);
-        ESP_LOGI("mqtt_event_callback", "data: %.*s", receive_data->data_len, receive_data->data);
+        ESP_LOGI(TAG, "topic length: %d", receive_data->topic_len);
+        ESP_LOGI(TAG, "data length: %d", receive_data->data_len);
+        ESP_LOGI(TAG, "topic: %.*s", receive_data->topic_len, receive_data->topic);
+        ESP_LOGI(TAG, "data: %.*s", receive_data->data_len, receive_data->data);
         /* 处理订阅确认 */
         hw_iot_mqtt_subscribe_type_t subscribe_type = hw_iot_mqtt_subscribe_type(receive_data);
-        ESP_LOGI("mqtt_event_callback", "subscribe_type: %d", subscribe_type);
+        ESP_LOGI(TAG, "subscribe_type: %d", subscribe_type);
         if (hw_iot_mqtt_subscribe_ack(subscribe_type, receive_data) != ESP_OK)
         {
-            ESP_LOGE("mqtt_event_callback", "Failed to subscribe ack");
+            ESP_LOGE(TAG, "Failed to subscribe ack");
         }
         break;
     default:

@@ -17,7 +17,7 @@ static char topic_str[256] = {0};
  * @param type 主题类型，枚举值定义如下：
  *             - HW_IOT_TOPIC_PROPERTIES_REPORT: 属性上报主题
  *             - HW_IOT_TOPIC_COMMAND_RESPONSE: 命令响应主题
- *             - HW_IOT_TOPIC_VERSION_REPORT: 版本上报主题
+ *             - HW_IOT_TOPIC_OTA_VERSION_REPORT: OTA版本上报主题
  * @param device_id 设备ID字符串，不能为NULL
  * @param request_id 请求ID字符串，仅在命令响应主题时使用，其他类型可为NULL
  *
@@ -55,7 +55,7 @@ char *hw_iot_mqtt_topic_get(hw_iot_topic_type_t type, char *device_id, char *req
             snprintf(topic_str, sizeof(topic_str), "$oc/devices/%s/sys/commands/response/request_id=%s", device_id, request_id);
         }
         break;
-    case HW_IOT_TOPIC_VERSION_REPORT:
+    case HW_IOT_TOPIC_OTA_VERSION_REPORT:
         required_len = snprintf(NULL, 0, "$oc/devices/%s/sys/events/up", device_id); // 版本上报主题长度
         if (required_len < sizeof(topic_str))                                        // 版本上报主题长度小于缓冲区大小
         {
@@ -95,7 +95,7 @@ int hw_iot_mqtt_topic_get_command_request_id(esp_mqtt_event_handle_t receive_dat
         ESP_LOGW("hw_iot_mqtt_topic_get_command_request_id", "Invalid command topic");
         return ESP_FAIL;
     }
-    
+
     ESP_LOGI("hw_iot_mqtt_topic_get_command_request_id", "receive command, topic: %.*s", receive_data->topic_len, receive_data->topic);
 
     char topic[128] = {0};
