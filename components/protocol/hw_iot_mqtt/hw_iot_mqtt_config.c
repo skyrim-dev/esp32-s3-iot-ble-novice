@@ -104,6 +104,19 @@ int hw_iot_mqtt_subscribe_ack_public(hw_iot_mqtt_subscribe_type_t subscribe_type
     return ESP_OK;
 }
 
+char *get_app_version(void)
+{
+    static char app_version[32] = {0};
+    if (app_version[0] == 0)
+    {
+        const esp_partition_t *running_partition = esp_ota_get_running_partition(); // 获取当前运行的分区
+        esp_app_desc_t running_desc;                                                // 应用描述
+        esp_ota_get_partition_description(running_partition, &running_desc);        // 获取应用描述
+        snprintf(app_version, sizeof(app_version), "%s", running_desc.version);     // 提取版本号
+    }
+    return app_version;
+}
+
 void hw_iot_mqtt_init(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {0};

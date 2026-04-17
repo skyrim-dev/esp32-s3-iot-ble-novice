@@ -27,8 +27,9 @@ extern esp_mqtt_client_handle_t mqtt_handle;
 void mqtt_event_callback(void *event_handler_arg,
                          esp_event_base_t event_base,
                          int32_t event_id,
-                         void *event_data); // MQTT 事件回调函数
+                         void *event_data);
 int hw_iot_mqtt_subscribe_ack_public(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_mqtt_event_handle_t receive_data);
-void hw_iot_mqtt_init(void); // 初始化 MQTT 客户端并连接到华为云 IoT 平台
+char *get_app_version(void);
+void hw_iot_mqtt_init(void);
 
 #endif

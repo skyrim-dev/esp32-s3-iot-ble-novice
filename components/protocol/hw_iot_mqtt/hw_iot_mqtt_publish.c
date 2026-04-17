@@ -87,8 +87,8 @@ int hw_iot_mqtt_ota_version_publish(void)
     const char *TAG = "hw_iot_mqtt_ota_version_publish";
     hw_iot_mqtt_ota_response_version_json_t json = {
         .object_device_id = HW_IOT_DEVICE_ID,
-        .sw_version = "1.0.0",
-        .fw_version = "1.0.0",
+        .sw_version = get_app_version(),     // 获取应用版本号
+        .fw_version = get_app_version(),     // 获取固件版本号
     };
     char *topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_OTA_VERSION_REPORT, HW_IOT_DEVICE_ID, NULL);
     char *json_str = hw_iot_mqtt_ota_version_report_json(&json);
