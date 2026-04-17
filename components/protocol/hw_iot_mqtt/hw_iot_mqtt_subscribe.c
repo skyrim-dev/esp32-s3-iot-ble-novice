@@ -18,8 +18,14 @@ hw_iot_mqtt_subscribe_type_t hw_iot_mqtt_subscribe_type(esp_mqtt_event_handle_t 
 
     char topic[256] = {0};
     char json_payload[256] = {0};
-    memcpy(topic, receive_data->topic, strlen(receive_data->topic));
-    memcpy(json_payload, receive_data->data, strlen(receive_data->data));
+    // 安全复制主题，确保以空字符结尾
+    int topic_len = (receive_data->topic_len < sizeof(topic) - 1) ? receive_data->topic_len : sizeof(topic) - 1;
+    memcpy(topic, receive_data->topic, topic_len);
+    topic[topic_len] = '\0';
+    // 安全复制数据载荷，确保以空字符结尾
+    int data_len = (receive_data->data_len < sizeof(json_payload) - 1) ? receive_data->data_len : sizeof(json_payload) - 1;
+    memcpy(json_payload, receive_data->data, data_len);
+    json_payload[data_len] = '\0';
 
     if (strstr(topic, "sys/messages/down")) // 消息主题
     {
