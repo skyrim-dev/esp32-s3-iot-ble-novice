@@ -35,7 +35,7 @@ hw_iot_mqtt_subscribe_type_t hw_iot_mqtt_subscribe_type(esp_mqtt_event_handle_t 
     {
         return HW_IOT_MQTT_COMMAND_SUBSCRIBE;
     }
-    else if (strstr(json_payload, "\"service_id\": \"$ota\"")) // OTA服务主题
+    else if (strstr(json_payload, "\"service_id\": \"$ota\"") && strstr(topic, "sys/events/down")) // OTA服务主题
     {
         if (strstr(json_payload, "\"event_type\": \"version_query\"")) // 版本查询事件
         {

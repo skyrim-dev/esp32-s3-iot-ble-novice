@@ -52,21 +52,22 @@ void mqtt_event_callback(void *event_handler_arg,
     esp_mqtt_event_handle_t receive_data = event_data;
     switch (event_id)
     {
-    case MQTT_EVENT_CONNECTED:
+    case MQTT_EVENT_CONNECTED: // 连接确认
         ESP_LOGI("mqtt_hw_iot", "Connected to broker");
         break;
-    case MQTT_EVENT_DISCONNECTED:
+    case MQTT_EVENT_DISCONNECTED: // 断开连接确认
         ESP_LOGI("mqtt_hw_iot", "Disconnected from broker");
         break;
-    case MQTT_EVENT_PUBLISHED:
+    case MQTT_EVENT_PUBLISHED: // 消息发布确认
         ESP_LOGI("mqtt_hw_iot", "mqtt publish ack");
         break;
-    case MQTT_EVENT_SUBSCRIBED:
+    case MQTT_EVENT_SUBSCRIBED: // 订阅确认
         ESP_LOGI("mqtt_hw_iot", "ESP32 Subscribed ack");
         break;
-    case MQTT_EVENT_UNSUBSCRIBED:
+    case MQTT_EVENT_UNSUBSCRIBED: // 取消订阅确认
+        ESP_LOGI("mqtt_hw_iot", "ESP32 Unsubscribed ack");
         break;
-    case MQTT_EVENT_DATA:
+    case MQTT_EVENT_DATA: // 接收到MQTT消息数据
         ESP_LOGI("mqtt_hw_iot", "topic length: %d", receive_data->topic_len);
         ESP_LOGI("mqtt_hw_iot", "data length: %d", receive_data->data_len);
         ESP_LOGI("mqtt_hw_iot", "topic: %.*s", receive_data->topic_len, receive_data->topic);
