@@ -57,7 +57,7 @@ int hw_iot_mqtt_properties_publish(void)
 int hw_iot_mqtt_ota_version_publish(void)
 {
     const char *TAG = "hw_iot_mqtt_ota_version_publish";
-    hw_iot_mqtt_firmware_version_json_t json = {
+    hw_iot_mqtt_ota_response_version_json_t json = {
         .object_device_id = HW_IOT_DEVICE_ID,
         .sw_version = "1.0.0",
         .fw_version = "1.0.0",

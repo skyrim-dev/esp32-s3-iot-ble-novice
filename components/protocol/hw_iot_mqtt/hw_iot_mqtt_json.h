@@ -39,11 +39,37 @@ typedef struct
     char *event_time;       /* 事件时间 */
     char *sw_version;       /* 软件版本 */
     char *fw_version;       /* 固件版本 */
-} hw_iot_mqtt_firmware_version_json_t;
+} hw_iot_mqtt_ota_response_version_json_t;
 
-char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *json); // 事件属性上报，服务结构体转换为 JSON 字符串
-char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *json);   // 命令确认响应，属性结构体转换为 JSON 字符串
-char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_firmware_version_json_t *json); // 设备上报软固件版本，属性结构体转换为 JSON 字符串
-char *cJSON_UnformattedFree(cJSON *root_js);                                          // 将cJSON对象序列化为无格式JSON字符串并释放对象
+//=============================================================================//
+/* 设备上报软升级状态 */
+typedef struct
+{
+    char *object_device_id; /* 设备 ID */
+    char *event_time;       /* 事件时间 */
+    char *version;          /* 设备当前版本号 */
+    char *description;      /* 升级状态描述信息 */
+    int progress;           /* 升级进度 */
+    int result_code;        /* 升级状态 */
+    /* 升级状态说明
+    0：success（处理成功）
+    1：device in use（设备使用中）
+    2：already the latest version（已经是最新版本）
+    3：low battery（电量不足）
+    4：insufficient storage space（剩余空间不足）
+    5：download timeout（下载超时）
+    6：upgrade package verification failure（升级包校验失败）
+    7：unsupported upgrade package type（升级包类型不支持）
+    8：insufficient memory（内存不足）
+    9：upgrade package installation failure（升级包安装失败）
+    255：internal exception（内部异常）
+    */
+} hw_iot_mqtt_ota_upgrade_status_json_t;
+
+char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *json);      // 事件属性上报，服务结构体转换为 JSON 字符串
+char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *json);        // 命令确认响应，属性结构体转换为 JSON 字符串
+char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_ota_response_version_json_t *json);  // 设备上报软固件版本，属性结构体转换为 JSON 字符串
+char *hw_iot_mqtt_upgrade_status_report_json(hw_iot_mqtt_ota_upgrade_status_json_t *json); // 设备上报软升级状态，属性结构体转换为 JSON 字符串
+char *cJSON_UnformattedFree(cJSON *root_js);                                               // 将cJSON对象序列化为无格式JSON字符串并释放对象
 
 #endif

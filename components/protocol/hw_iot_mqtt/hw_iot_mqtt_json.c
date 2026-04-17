@@ -126,7 +126,7 @@ char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *jso
     return js_str;
 }
 
-char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_firmware_version_json_t *json)
+char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_ota_response_version_json_t *json)
 {
     char *TAG = "hw_iot_mqtt_ota_version_report_json";
     if (!json)
