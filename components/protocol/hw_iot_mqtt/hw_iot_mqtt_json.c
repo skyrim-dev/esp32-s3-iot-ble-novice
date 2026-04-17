@@ -30,9 +30,10 @@
  */
 char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *json)
 {
+    const char *TAG = "hw_iot_mqtt_properties_report_json";
     if (!json)
     {
-        ESP_LOGE("hw_iot_mqtt_properties_report_json", "Input json pointer is NULL");
+        ESP_LOGE(TAG, "Input json pointer is NULL");
         return NULL;
     }
 
@@ -40,7 +41,7 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
     cJSON *root_js = cJSON_CreateObject(); // 创建根 json 对象
     if (!root_js)
     {
-        ESP_LOGE("hw_iot_mqtt_properties_report_json", "cJSON_CreateObject failed");
+        ESP_LOGE(TAG, "cJSON_CreateObject failed");
         return NULL;
     }
 
@@ -48,7 +49,7 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
     cJSON *services_js = cJSON_CreateArray(); // 创建 services 数组对象
     if (!services_js)
     {
-        ESP_LOGE("hw_iot_mqtt_properties_report_json", "cJSON_CreateArray failed");
+        ESP_LOGE(TAG, "cJSON_CreateArray failed");
         cJSON_Delete(root_js);
         return NULL;
     }
@@ -60,14 +61,14 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
     {
         if (json->json[i].service_id == NULL) // 如果 service_id 为空，说明没有更多服务了，退出循环
         {
-            ESP_LOGW("hw_iot_mqtt_properties_report_json", "Configuration allows up to 10 services, but only %d services found", i);
+            ESP_LOGW(TAG, "Configuration allows up to 10 services, but only %d services found", i);
             break;
         }
         /* 重要 */
         cJSON *service_obj_js = cJSON_CreateObject(); // 创建 services 数组对象里的单个服务对象
         if (!service_obj_js)
         {
-            ESP_LOGE("hw_iot_mqtt_properties_report_json", "cJSON_CreateObject failed");
+            ESP_LOGE(TAG, "cJSON_CreateObject failed");
             cJSON_Delete(root_js);
             return NULL;
         }
@@ -78,7 +79,7 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
         cJSON *properties_js = cJSON_CreateObject(); // 创建 properties 对象
         if (!properties_js)
         {
-            ESP_LOGE("hw_iot_mqtt_properties_report_json", "cJSON_CreateObject failed");
+            ESP_LOGE(TAG, "cJSON_CreateObject failed");
             cJSON_Delete(root_js);
             return NULL;
         }
@@ -89,7 +90,7 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
         {
             if (json->json[i].properties_id[j] == NULL) // 如果 property_id 为空，说明没有更多属性了，退出循环
             {
-                ESP_LOGW("hw_iot_mqtt_properties_report_json", "Configuration allows up to 10 properties per service, but only %d properties found for service_id: %s", j, json->json[i].service_id);
+                ESP_LOGW(TAG, "Configuration allows up to 10 properties per service, but only %d properties found for service_id: %s", j, json->json[i].service_id);
                 break;
             }
             cJSON_AddNumberToObject(properties_js, json->json[i].properties_id[j], json->json[i].properties_value[j]); // 添加 property_id 到 properties 对象
@@ -134,9 +135,10 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
  */
 char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *json)
 {
+    char *TAG = "hw_iot_mqtt_command_response_json";
     if (!json)
     {
-        ESP_LOGE("hw_iot_mqtt_command_response_json", "Input json pointer is NULL");
+        ESP_LOGE(TAG, "Input json pointer is NULL");
         return NULL;
     }
 
@@ -144,7 +146,7 @@ char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *jso
     cJSON *root_js = cJSON_CreateObject(); // 创建根 json 对象
     if (!root_js)
     {
-        ESP_LOGE("hw_iot_mqtt_command_response_json", "cJSON_CreateObject failed");
+        ESP_LOGE(TAG, "cJSON_CreateObject failed");
         return NULL;
     }
     cJSON_AddNumberToObject(root_js, "result_code", json->result_code);     // 添加 result_code 到根 json 对象
@@ -153,7 +155,7 @@ char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *jso
     cJSON *paras_js = cJSON_CreateObject(); // 创建 paras 对象
     if (!paras_js)
     {
-        ESP_LOGE("hw_iot_mqtt_command_response_json", "cJSON_CreateObject failed");
+        ESP_LOGE(TAG, "cJSON_CreateObject failed");
         cJSON_Delete(root_js);
         return NULL;
     }
@@ -249,15 +251,16 @@ char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_firmware_version_json_t *j
  */
 char *cJSON_UnformattedFree(cJSON *root_js)
 {
+    char *TAG = "cJSON_UnformattedFree";
     /* 将cJSON对象序列化为无格式JSON字符串 */
     char *js_str = cJSON_PrintUnformatted(root_js); // 生成 JSON 字符串，不包含格式化字符
     if (!js_str)
     {
-        ESP_LOGE("cJSON_UnformattedFree", "cJSON_PrintUnformatted failed");
+        ESP_LOGE(TAG, "cJSON_PrintUnformatted failed");
         cJSON_Delete(root_js);
         return NULL;
     }
-    ESP_LOGI("cJSON_UnformattedFree", "Generated JSON for service(s): %s", js_str);
+    ESP_LOGI(TAG, "Generated JSON for service(s): %s", js_str);
 
     cJSON_Delete(root_js); // 释放根 json 对象
 

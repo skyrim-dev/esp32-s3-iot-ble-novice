@@ -90,13 +90,14 @@ char *hw_iot_mqtt_topic_get(hw_iot_topic_type_t type, char *device_id, char *req
  */
 int hw_iot_mqtt_topic_get_command_request_id(esp_mqtt_event_handle_t receive_data, char *request_id)
 {
+    const char *TAG = "hw_iot_mqtt_topic_get_command_request_id";
     if (!receive_data || !strstr(receive_data->topic, "sys/commands/request_id="))
     {
-        ESP_LOGW("hw_iot_mqtt_topic_get_command_request_id", "Invalid command topic");
+        ESP_LOGW(TAG, "Invalid command topic");
         return ESP_FAIL;
     }
 
-    ESP_LOGI("hw_iot_mqtt_topic_get_command_request_id", "receive command, topic: %.*s", receive_data->topic_len, receive_data->topic);
+    ESP_LOGI(TAG, "receive command, topic: %.*s", receive_data->topic_len, receive_data->topic);
 
     char topic[128] = {0};
     int copy_len = (receive_data->topic_len < sizeof(topic) - 1)
@@ -112,7 +113,7 @@ int hw_iot_mqtt_topic_get_command_request_id(esp_mqtt_event_handle_t receive_dat
         int len = end ? (end - ptr) : strlen(ptr); // 计算请求ID的长度，如果没有斜杠，则使用剩余字符串的长度
         memcpy(request_id, ptr, len);              // 复制请求ID到本地缓冲区
         request_id[len] = '\0';                    // 确保字符串以空字符结尾
-        ESP_LOGI("hw_iot_mqtt_topic_get_command_request_id", "request_id: %s", request_id);
+        ESP_LOGI(TAG, "request_id: %s", request_id);
     }
     return ESP_OK;
 }
