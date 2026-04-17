@@ -1,0 +1,13 @@
+# ESP-IDF Partition Table
+# Note: if you have increased the bootloader size, make sure to update the offsets to avoid overlap,
+#       if the offset is empty, the offset is automatically calculated by the system
+#       16k - 0x4000
+#       8k  - 0x2000
+#       4k  - 0x1000
+# Name,     Type,   SubType,    Offset,     Size,   Flags
+nvs,        data,   nvs,        ,           16K,
+otadata,    data,   ota,        ,           8K,
+phy_init,   data,   phy,        ,           4K,
+factory,    app,    factory,    ,           1500k,
+ota_0,      app,    ota_0,      ,           1500k,
+ota_1,      app,    ota_1,      ,           1500k,
