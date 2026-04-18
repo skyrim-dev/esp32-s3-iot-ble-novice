@@ -3,5 +3,5 @@ idf_component_register(
         "ota/hw_iot_ota.c"
         "ota/ota_manager.c"
     INCLUDE_DIRS "ota"
-    REQUIRES esp_https_ota mbedtls
+    REQUIRES esp_https_ota mbedtls app_update
 )

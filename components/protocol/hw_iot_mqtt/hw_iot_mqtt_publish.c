@@ -6,6 +6,7 @@
 #include "hw_iot_mqtt_client.h"
 #include "hw_iot_mqtt_topic.h"
 #include "hw_iot_mqtt_json.h"
+#include "ota_manager.h"
 
 esp_err_t hw_iot_mqtt_publish(char *topic, char *json_str)
 {

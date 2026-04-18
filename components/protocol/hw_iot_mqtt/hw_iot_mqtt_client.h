@@ -30,7 +30,6 @@ void mqtt_event_callback(void *event_handler_arg,
                          int32_t event_id,
                          void *event_data);
 esp_err_t hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_mqtt_event_handle_t receive_data);
-char *get_app_version(void);
 void hw_iot_mqtt_init(void);
 
 #endif
