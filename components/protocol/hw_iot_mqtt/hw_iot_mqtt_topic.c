@@ -34,7 +34,7 @@ char *hw_iot_mqtt_topic_get(hw_iot_topic_type_t type, char *device_id, char *req
             snprintf(topic_str, sizeof(topic_str), "$oc/devices/%s/sys/commands/response/request_id=%s", device_id, request_id);
         }
         break;
-    case HW_IOT_TOPIC_OTA_VERSION_REPORT:
+    case HW_IOT_TOPIC_OTA_VERSION_OR_STATE_REPORT:
         required_len = snprintf(NULL, 0, "$oc/devices/%s/sys/events/up", device_id); // 版本上报主题长度
         if (required_len < sizeof(topic_str))                                        // 版本上报主题长度小于缓冲区大小
         {

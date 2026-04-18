@@ -36,7 +36,6 @@ typedef struct
 typedef struct
 {
     char *object_device_id; /* 设备 ID */
-    char *event_time;       /* 事件时间 */
     char *sw_version;       /* 软件版本 */
     char *fw_version;       /* 固件版本 */
 } hw_iot_mqtt_ota_response_version_json_t;
@@ -46,7 +45,6 @@ typedef struct
 typedef struct
 {
     char *object_device_id; /* 设备 ID */
-    char *event_time;       /* 事件时间 */
     char *version;          /* 设备当前版本号 */
     char *description;      /* 升级状态描述信息 */
     int progress;           /* 升级进度 */
