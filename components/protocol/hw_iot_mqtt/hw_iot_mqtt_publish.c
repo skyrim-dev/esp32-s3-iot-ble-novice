@@ -108,18 +108,15 @@ esp_err_t hw_iot_mqtt_ota_version_report_publish(void)
     return ESP_OK;
 }
 
-esp_err_t hw_iot_mqtt_ota_status_report_publish(void)
+esp_err_t hw_iot_mqtt_ota_status_report_publish(const hw_iot_mqtt_ota_status_report_json_t *report)
 {
     const char *TAG = "hw_iot_mqtt_ota_status_report_publish";
-    hw_iot_mqtt_ota_status_report_json_t json = {
-        .object_device_id = HW_IOT_DEVICE_ID,
-        .result_code = 0,             // success
-        .progress = 0,                // 0-100
-        .version = get_app_version(), // 获取应用版本号
-        .description = "OTA upgrade status report",
-    };
     char *topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_OTA_VERSION_OR_STATE_REPORT, HW_IOT_DEVICE_ID, NULL);
-    char *json_str = hw_iot_mqtt_ota_status_report_json(&json);
+    char *json_str = hw_iot_mqtt_ota_status_report_json(report);
+    if (!json_str) {
+        ESP_LOGE(TAG, "Failed to build OTA status report json");
+        return ESP_FAIL;
+    }
     if (hw_iot_mqtt_publish(topic, json_str) != ESP_OK)
     {
         ESP_LOGE(TAG, "Failed to publish OTA status report");

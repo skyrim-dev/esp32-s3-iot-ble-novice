@@ -23,10 +23,10 @@ void hw_iot_ota_callback(int code)
 {
     const char *TAG = "hw_iot_ota_callback";
     ESP_LOGI(TAG, "OTA task completed with code: %d", code);
-    if (hw_iot_mqtt_ota_status_report_publish() != ESP_OK)
-    {
-        ESP_LOGE(TAG, "Failed to publish OTA status report");
-    }
+    // if (hw_iot_mqtt_ota_status_report_publish() != ESP_OK)
+    // {
+    //     ESP_LOGE(TAG, "Failed to publish OTA status report");
+    // }
 }
 
 // HTTP客户端初始化回调函数
