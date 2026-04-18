@@ -113,8 +113,8 @@ esp_err_t hw_iot_mqtt_ota_status_report_publish(void)
     const char *TAG = "hw_iot_mqtt_ota_status_report_publish";
     hw_iot_mqtt_ota_status_report_json_t json = {
         .object_device_id = HW_IOT_DEVICE_ID,
-        .result_code = 0,   // success
-        .progress = 0,      // 0-100
+        .result_code = 0,             // success
+        .progress = 0,                // 0-100
         .version = get_app_version(), // 获取应用版本号
         .description = "OTA upgrade status report",
     };

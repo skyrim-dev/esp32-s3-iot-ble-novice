@@ -9,7 +9,7 @@
 #include <esp_err.h>
 
 #include "hw_iot_ota.h"
-
+#include "hw_iot_mqtt_publish.h"
 
 static char hw_iot_url[256];
 static char hw_iot_access_token[256];
@@ -21,6 +21,12 @@ static bool is_current_ota_task_running = false;
 // OTA任务完成回调函数
 void hw_iot_ota_callback(int code)
 {
+    const char *TAG = "hw_iot_ota_callback";
+    ESP_LOGI(TAG, "OTA task completed with code: %d", code);
+    if (hw_iot_mqtt_ota_status_report_publish() != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to publish OTA status report");
+    }
 }
 
 // HTTP客户端初始化回调函数
