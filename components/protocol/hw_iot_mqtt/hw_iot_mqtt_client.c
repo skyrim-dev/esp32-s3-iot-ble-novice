@@ -12,8 +12,8 @@
 #include "hw_iot_mqtt_topic.h"
 #include "hw_iot_mqtt_subscribe.h"
 #include "hw_iot_mqtt_publish.h"
-
 #include "ota_manager.h"
+#include "hw_iot_ota.h"
 
 extern const char _binary_cert_pem_start[] asm("_binary_cert_pem_start");
 extern const char _binary_cert_pem_end[] asm("_binary_cert_pem_end");
@@ -32,6 +32,31 @@ void mqtt_event_callback(void *event_handler_arg,
     {
     case MQTT_EVENT_CONNECTED: // 连接确认
         ESP_LOGI(TAG, "Connected to broker");
+        if (hw_iot_ota_is_reboot_pending_flag_set()) // 如果有重启待办标志
+        {
+            ESP_LOGI(TAG, "Detected OTA post-reboot confirmation pending");
+            hw_iot_mqtt_ota_status_report_json_t report = {
+                // 构建OTA状态报告
+                .object_device_id = HW_IOT_DEVICE_ID,
+                .version = get_app_version(),
+                .progress = 100,
+                .result_code = 0,
+                .description = "ota success confirmed after reboot",
+            };
+            esp_err_t status_err = hw_iot_mqtt_ota_status_report_publish(&report); // 发布OTA状态报告
+            esp_err_t version_err = hw_iot_mqtt_ota_version_report_publish();      // 发布OTA版本报告
+            if (status_err == ESP_OK && version_err == ESP_OK)
+            {
+                if (hw_iot_ota_clear_reboot_pending_flag() != ESP_OK) // 上报成功后再，清除重启待办标志
+                {
+                    ESP_LOGE(TAG, "Failed to clear OTA reboot pending flag");
+                }
+            }
+            else
+            {
+                ESP_LOGE(TAG, "Failed to complete OTA post-reboot confirmation");
+            }
+        }
         break;
     case MQTT_EVENT_DISCONNECTED: // 断开连接确认
         ESP_LOGI(TAG, "Disconnected from broker");
