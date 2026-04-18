@@ -102,14 +102,30 @@ esp_err_t time_sync_init(void)
         return ESP_OK;
     }
     ESP_LOGI(TAG, "Initializing SNTP");
-    esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG("pool.ntp.org");
-    esp_netif_sntp_init(&config);
-    esp_netif_sntp_start();
-    if (esp_netif_sntp_sync_wait(pdMS_TO_TICKS(10000)) == ESP_OK)
+    esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG("ntp.aliyun.com");
+    esp_err_t err = esp_netif_sntp_init(&config);
+    if (err != ESP_OK)
     {
-        ESP_LOGI(TAG, "System time synced");
+        ESP_LOGE(TAG, "esp_netif_sntp_init failed: %s", esp_err_to_name(err));
+        return err;
+    }
+    err = esp_netif_sntp_start();
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "esp_netif_sntp_start failed: %s", esp_err_to_name(err));
+        return err;
+    }
+    time_t before = time(NULL);
+    ESP_LOGI(TAG, "Time before sync: %lld", (long long)before);
+    err = esp_netif_sntp_sync_wait(pdMS_TO_TICKS(30000));
+    if (err == ESP_OK)
+    {
+        time_t now = time(NULL);
+        ESP_LOGI(TAG, "System time synced: %lld", (long long)now);
         return ESP_OK;
     }
-    ESP_LOGW(TAG, "System time sync timeout");
+    time_t after = time(NULL);
+    ESP_LOGW(TAG, "System time sync timeout, wait result: %s, current time: %lld",
+             esp_err_to_name(err), (long long)after);
     return ESP_FAIL;
 }
