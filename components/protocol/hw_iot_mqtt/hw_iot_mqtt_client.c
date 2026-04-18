@@ -20,6 +20,7 @@ extern const char _binary_cert_pem_end[] asm("_binary_cert_pem_end");
 
 esp_mqtt_client_handle_t mqtt_handle = NULL;
 
+// MQTT事件回调函数
 void mqtt_event_callback(void *event_handler_arg,
                          esp_event_base_t event_base,
                          int32_t event_id,
@@ -61,6 +62,7 @@ void mqtt_event_callback(void *event_handler_arg,
     }
 }
 
+// 处理订阅确认
 esp_err_t hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type, esp_mqtt_event_handle_t receive_data)
 {
     char *TAG = "hw_iot_mqtt_subscribe_ack";
@@ -161,6 +163,7 @@ esp_err_t hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type,
     return ESP_OK;
 }
 
+// 初始化MQTT客户端
 void hw_iot_mqtt_init(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {0};

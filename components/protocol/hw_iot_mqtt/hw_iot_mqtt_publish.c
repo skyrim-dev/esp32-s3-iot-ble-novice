@@ -8,6 +8,7 @@
 #include "hw_iot_mqtt_json.h"
 #include "ota_manager.h"
 
+// 发布MQTT消息
 esp_err_t hw_iot_mqtt_publish(char *topic, char *json_str)
 {
     char *TAG = "hw_iot_mqtt_publish";
@@ -37,6 +38,7 @@ esp_err_t hw_iot_mqtt_publish(char *topic, char *json_str)
     return ESP_OK;
 }
 
+// 发布属性报告
 esp_err_t hw_iot_mqtt_properties_publish(void)
 {
     const char *TAG = "hw_iot_mqtt_properties_publish";
@@ -55,6 +57,7 @@ esp_err_t hw_iot_mqtt_properties_publish(void)
     return ESP_OK;
 }
 
+// 发布命令响应
 esp_err_t hw_iot_mqtt_command_report(char *request_id)
 {
     const char *TAG = "hw_iot_mqtt_command_report";
@@ -76,14 +79,12 @@ esp_err_t hw_iot_mqtt_command_report(char *request_id)
         return ESP_FAIL;
     }
     char *json_str = hw_iot_mqtt_command_response_json(&command_response_json); // 生成命令响应 JSON 字符串
-    ESP_LOGI(TAG, "request_id: %s", request_id);
-    ESP_LOGI(TAG, "topic: %s", topic);
-    ESP_LOGI(TAG, "json_str: %s", json_str);
-    hw_iot_mqtt_publish(topic, json_str); // 发布命令响应
+    hw_iot_mqtt_publish(topic, json_str);                                       // 发布命令响应
     free(json_str);
     return ESP_OK;
 }
 
+// 发布固件版本报告
 esp_err_t hw_iot_mqtt_ota_version_publish(void)
 {
     const char *TAG = "hw_iot_mqtt_ota_version_publish";

@@ -6,6 +6,7 @@
 
 #include "hw_iot_mqtt_json.h"
 
+// 生成属性报告 JSON 字符串
 char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *json)
 {
     const char *TAG = "hw_iot_mqtt_properties_report_json";
@@ -91,6 +92,7 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
     return js_str;
 }
 
+// 生成命令响应 JSON 字符串
 char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *json)
 {
     char *TAG = "hw_iot_mqtt_command_response_json";
@@ -126,6 +128,7 @@ char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *jso
     return js_str;
 }
 
+// 生成固件版本报告 JSON 字符串
 char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_ota_response_version_json_t *json)
 {
     char *TAG = "hw_iot_mqtt_ota_version_report_json";
@@ -189,6 +192,7 @@ char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_ota_response_version_json_
     return js_str;
 }
 
+// 将cJSON对象序列化为无格式 JSON 字符串
 char *cJSON_UnformattedFree(cJSON *root_js)
 {
     char *TAG = "cJSON_UnformattedFree";

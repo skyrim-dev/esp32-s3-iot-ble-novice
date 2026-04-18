@@ -8,6 +8,7 @@
 #include "hw_iot_mqtt_client.h"
 #include "hw_iot_mqtt_publish.h"
 
+// 获取MQTT订阅类型
 hw_iot_mqtt_subscribe_type_t hw_iot_mqtt_subscribe_type(esp_mqtt_event_handle_t receive_data)
 {
     char *TAG = "hw_iot_mqtt_subscribe_type";
