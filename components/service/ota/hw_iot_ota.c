@@ -7,6 +7,7 @@
 #include <freertos/task.h>
 #include <esp_crt_bundle.h>
 #include <esp_err.h>
+#include <nvs.h>
 
 #include "hw_iot_ota.h"
 #include "hw_iot_mqtt_publish.h"
@@ -97,7 +98,7 @@ void hw_iot_ota_task(void *param)
     if (ota_finish_err != ESP_OK)
     {
         ESP_LOGE(TAG, "Failed to start OTA task, err=%d", ota_finish_err);
-        if (hw_iot_ota_finish_cb) // 调用回调函数，通知OTA任务失败
+        if (hw_iot_ota_finish_cb) // 如果有回调函数注册
         {
             hw_iot_ota_finish_cb(ota_finish_err); // 调用“之前保存好的那个回调函数指针”，通知OTA任务失败，将返回的真实错误码往上透传
         }
@@ -110,12 +111,16 @@ void hw_iot_ota_task(void *param)
         if (hw_iot_ota_finish_cb)
         {
             ESP_LOGI(TAG, "OTA task finished");
-            if (hw_iot_ota_finish_cb) // 调用“之前保存好的那个回调函数指针”，通知OTA任务完成
+            if (hw_iot_ota_finish_cb) // 如果有回调函数注册
             {
-                hw_iot_ota_finish_cb(ESP_OK); // 通知OTA任务完成
+                hw_iot_ota_finish_cb(ESP_OK);                       // 调用“之前保存好的那个回调函数指针”，通知OTA任务完成
+                if (hw_iot_ota_set_reboot_pending_flag() != ESP_OK) // 设置重启待办标志
+                {
+                    ESP_LOGE(TAG, "Failed to set reboot pending flag");
+                }
             }
             vTaskDelay(pdMS_TO_TICKS(1000)); // 等待1秒，确保OTA任务完成
-            esp_restart();
+            esp_restart();                   // 重启设备
         }
     }
     is_current_ota_task_running = false;
@@ -162,4 +167,59 @@ esp_err_t hw_iot_ota_init(const char *url, const char *access_token, hw_iot_ota_
     }
     hw_iot_ota_finish_cb = cb; // 初始化回调函数
     return ESP_OK;
+}
+
+// 设置待重启标志
+esp_err_t hw_iot_ota_set_reboot_pending_flag(void)
+{
+    nvs_handle_t nvs_handle;
+    esp_err_t err = nvs_open(OTA_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle); // 打开NVS命名空间，获取句柄
+    if (err != ESP_OK)
+    {
+        return err;
+    }
+    err = nvs_set_u8(nvs_handle, OTA_NVS_KEY_REBOOT_PENDING, 1); // 设置待重启标志为1
+    if (err == ESP_OK)
+    {
+        err = nvs_commit(nvs_handle); // 提交NVS操作
+    }
+    nvs_close(nvs_handle); // 关闭NVS句柄
+    return err;
+}
+
+// 检查是否设置了待重启标志
+bool hw_iot_ota_is_reboot_pending_flag_set(void)
+{
+    nvs_handle_t nvs_handle;
+    uint8_t value = 0;
+    esp_err_t err = nvs_open(OTA_NVS_NAMESPACE, NVS_READONLY, &nvs_handle); // 打开NVS命名空间，获取句柄
+    if (err != ESP_OK)
+    {
+        return false;
+    }
+    err = nvs_get_u8(nvs_handle, OTA_NVS_KEY_REBOOT_PENDING, &value); // 获取待重启标志值
+    nvs_close(nvs_handle);                                            // 关闭NVS句柄
+    if (err != ESP_OK)
+    {
+        return false;
+    }
+    return value == 1;
+}
+
+// 清除待重启标志
+esp_err_t hw_iot_ota_clear_reboot_pending_flag(void)
+{
+    nvs_handle_t nvs_handle;
+    esp_err_t err = nvs_open(OTA_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle); // 打开NVS命名空间，获取句柄
+    if (err != ESP_OK)
+    {
+        return err;
+    }
+    err = nvs_set_u8(nvs_handle, OTA_NVS_KEY_REBOOT_PENDING, 0); // 设置待重启标志为0
+    if (err == ESP_OK)
+    {
+        err = nvs_commit(nvs_handle); // 提交NVS操作
+    }
+    nvs_close(nvs_handle); // 关闭NVS句柄
+    return err;
 }
