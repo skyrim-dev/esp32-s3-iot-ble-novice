@@ -174,10 +174,19 @@ esp_err_t hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type,
         ESP_LOGI(TAG, "OTA URL: %s", url_js->valuestring);
         ESP_LOGI(TAG, "OTA access_token: %s", access_token_js->valuestring);
 
-        ota_upgrade_request_t req = {
-            .url = url_js->valuestring,
-            .access_token = access_token_js->valuestring,
-        };
+        ota_upgrade_request_t req = {0};
+        if (snprintf(req.url, sizeof(req.url), "%s", url_js->valuestring) >= sizeof(req.url)) // 初始化URL
+        {
+            ESP_LOGE(TAG, "OTA URL is too long");
+            cJSON_Delete(ota_js);
+            return ESP_FAIL;
+        }
+        if (snprintf(req.access_token, sizeof(req.access_token), "%s", access_token_js->valuestring) >= sizeof(req.access_token)) // 初始化access_token
+        {
+            ESP_LOGE(TAG, "OTA access_token is too long");
+            cJSON_Delete(ota_js);
+            return ESP_FAIL;
+        }
         if (ota_manager_submit(&req) != ESP_OK)
         {
             ESP_LOGE(TAG, "Failed to submit upgrade request");
