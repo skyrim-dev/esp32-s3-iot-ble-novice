@@ -10,6 +10,8 @@
 
 #include "hw_iot_ota.h"
 #include "hw_iot_mqtt_publish.h"
+#include "hw_iot_mqtt_client.h"
+#include "ota_manager.h"
 
 static char hw_iot_url[256];
 static char hw_iot_access_token[256];
@@ -23,10 +25,37 @@ void hw_iot_ota_callback(int code)
 {
     const char *TAG = "hw_iot_ota_callback";
     ESP_LOGI(TAG, "OTA task completed with code: %d", code);
-    // if (hw_iot_mqtt_ota_status_report_publish() != ESP_OK)
-    // {
-    //     ESP_LOGE(TAG, "Failed to publish OTA status report");
-    // }
+    hw_iot_mqtt_ota_status_report_json_t report = {
+        .object_device_id = HW_IOT_DEVICE_ID,    // 设备ID
+        .version = get_app_version(),            // 应用版本号
+        .progress = 0,                           // OTA进度
+        .result_code = 255,                      // OTA结果码
+        .description = "ota internal exception", // OTA异常描述：内部异常
+    };
+
+    ESP_LOGI(TAG, "OTA report: result=%d progress=%d version=%s desc=%s",
+             report.result_code,
+             report.progress,
+             report.version,
+             report.description);
+
+    if (code == ESP_OK)
+    {
+        report.result_code = 0;                                       // OTA成功
+        report.progress = 100;                                        // OTA进度：100%
+        report.description = "ota package installed, reboot pending"; // OTA成功描述：OTA包已安装，待重启
+    }
+    else
+    {
+        report.result_code = 255;                       // OTA失败：内部异常
+        report.progress = 0;                            // OTA进度：0%
+        report.description = "ota installation failed"; // OTA失败描述：OTA安装失败
+    }
+
+    if (hw_iot_mqtt_ota_status_report_publish(&report) != ESP_OK) // 发布OTA状态报告
+    {
+        ESP_LOGE(TAG, "Failed to publish OTA status report");
+    }
 }
 
 // HTTP客户端初始化回调函数
@@ -70,7 +99,7 @@ void hw_iot_ota_task(void *param)
         ESP_LOGE(TAG, "Failed to start OTA task, err=%d", ota_finish_err);
         if (hw_iot_ota_finish_cb) // 调用回调函数，通知OTA任务失败
         {
-            hw_iot_ota_finish_cb(ESP_FAIL); // 通知OTA任务失败
+            hw_iot_ota_finish_cb(ota_finish_err); // 调用“之前保存好的那个回调函数指针”，通知OTA任务失败，将返回的真实错误码往上透传
         }
         is_current_ota_task_running = false; // OTA任务失败，重置状态
         vTaskDelete(NULL);                   // 需要先删除任务，不能直接返回
@@ -81,7 +110,7 @@ void hw_iot_ota_task(void *param)
         if (hw_iot_ota_finish_cb)
         {
             ESP_LOGI(TAG, "OTA task finished");
-            if (hw_iot_ota_finish_cb) // 调用回调函数，通知OTA任务完成
+            if (hw_iot_ota_finish_cb) // 调用“之前保存好的那个回调函数指针”，通知OTA任务完成
             {
                 hw_iot_ota_finish_cb(ESP_OK); // 通知OTA任务完成
             }
