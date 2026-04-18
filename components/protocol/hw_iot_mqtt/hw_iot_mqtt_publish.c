@@ -58,7 +58,6 @@ esp_err_t hw_iot_mqtt_properties_publish(void)
         return ESP_FAIL;
     }
     free(json_str);
-    free(topic);
     return ESP_OK;
 }
 
@@ -86,7 +85,6 @@ esp_err_t hw_iot_mqtt_command_report(char *request_id)
     char *json_str = hw_iot_mqtt_command_response_json(&command_response_json); // 生成命令响应 JSON 字符串
     hw_iot_mqtt_publish(topic, json_str);                                       // 发布命令响应
     free(json_str);
-    free(topic);
     return ESP_OK;
 }
 
@@ -107,7 +105,6 @@ esp_err_t hw_iot_mqtt_ota_version_report_publish(void)
         return ESP_FAIL;
     }
     free(json_str);
-    free(topic);
     return ESP_OK;
 }
 
@@ -129,6 +126,5 @@ esp_err_t hw_iot_mqtt_ota_status_report_publish(void)
         return ESP_FAIL;
     }
     free(json_str);
-    free(topic);
     return ESP_OK;
 }
