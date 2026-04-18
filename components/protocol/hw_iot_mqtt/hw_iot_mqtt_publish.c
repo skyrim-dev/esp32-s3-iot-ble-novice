@@ -89,10 +89,10 @@ esp_err_t hw_iot_mqtt_command_report(char *request_id)
 }
 
 // 发布固件版本报告
-esp_err_t hw_iot_mqtt_ota_version_publish(void)
+esp_err_t hw_iot_mqtt_ota_version_report_publish(void)
 {
     const char *TAG = "hw_iot_mqtt_ota_version_publish";
-    hw_iot_mqtt_ota_version_response_json_t json = {
+    hw_iot_mqtt_ota_version_report_json_t json = {
         .object_device_id = HW_IOT_DEVICE_ID,
         .sw_version = get_app_version(), // 获取应用版本号
         .fw_version = get_app_version(), // 获取固件版本号
@@ -111,7 +111,7 @@ esp_err_t hw_iot_mqtt_ota_version_publish(void)
 esp_err_t hw_iot_mqtt_ota_status_report_publish(void)
 {
     const char *TAG = "hw_iot_mqtt_ota_status_report_publish";
-    hw_iot_mqtt_ota_status_response_json_t json = {
+    hw_iot_mqtt_ota_status_report_json_t json = {
         .object_device_id = HW_IOT_DEVICE_ID,
     };
     char *topic = hw_iot_mqtt_topic_get(HW_IOT_TOPIC_OTA_VERSION_OR_STATE_REPORT, HW_IOT_DEVICE_ID, NULL);

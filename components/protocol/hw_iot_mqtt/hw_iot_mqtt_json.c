@@ -129,7 +129,7 @@ char *hw_iot_mqtt_command_response_json(hw_iot_mqtt_command_response_json_t *jso
 }
 
 // 生成固件版本报告 JSON 字符串
-char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_ota_version_response_json_t *json)
+char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_ota_version_report_json_t *json)
 {
     char *TAG = "hw_iot_mqtt_ota_version_report_json";
     if (!json)
@@ -193,7 +193,7 @@ char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_ota_version_response_json_
 }
 
 // 生成升级状态报告 JSON 字符串
-char *hw_iot_mqtt_ota_status_report_json(hw_iot_mqtt_ota_status_response_json_t *json)
+char *hw_iot_mqtt_ota_status_report_json(hw_iot_mqtt_ota_status_report_json_t *json)
 {
     char *TAG = "hw_iot_mqtt_ota_status_report_json";
     if (!json)

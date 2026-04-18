@@ -93,7 +93,7 @@ esp_err_t hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type,
         break;
     case HW_IOT_MQTT_OTA_VERSION_QUERY_SUBSCRIBE: // OTA 版本查询订阅
         ESP_LOGI(TAG, "Version query subscribe ack");
-        if (hw_iot_mqtt_ota_version_publish() != ESP_OK)
+        if (hw_iot_mqtt_ota_version_report_publish() != ESP_OK)
         {
             ESP_LOGE(TAG, "Failed to report version");
             return ESP_FAIL;
