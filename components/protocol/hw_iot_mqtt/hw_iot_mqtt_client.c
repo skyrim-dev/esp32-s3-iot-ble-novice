@@ -76,10 +76,10 @@ esp_err_t hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type,
     }
     switch (subscribe_type)
     {
-    case HW_IOT_MQTT_MESSAGE_SUBSCRIBE:
+    case HW_IOT_MQTT_MESSAGE_SUBSCRIBE: // 消息订阅
         ESP_LOGI(TAG, "Message subscribe ack");
         break;
-    case HW_IOT_MQTT_COMMAND_SUBSCRIBE:
+    case HW_IOT_MQTT_COMMAND_SUBSCRIBE: // 命令订阅
         ESP_LOGI(TAG, "Command subscribe ack");
         char request_id[128] = {0};
         hw_iot_mqtt_topic_get_command_request_id(receive_data, request_id); // 从topic中提取request_id
@@ -89,7 +89,7 @@ esp_err_t hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type,
             return ESP_FAIL;
         }
         break;
-    case HW_IOT_MQTT_VERSION_QUERY_SUBSCRIBE:
+    case HW_IOT_MQTT_OTA_VERSION_QUERY_SUBSCRIBE: // OTA 版本查询订阅
         ESP_LOGI(TAG, "Version query subscribe ack");
         if (hw_iot_mqtt_ota_version_publish() != ESP_OK)
         {
@@ -97,7 +97,7 @@ esp_err_t hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type,
             return ESP_FAIL;
         }
         break;
-    case HW_IOT_MQTT_SFW_UPGRADE_SUBSCRIBE:
+    case HW_IOT_MQTT_OTA_SFW_UPGRADE_SUBSCRIBE: // OTA 固件升级订阅
         ESP_LOGI(TAG, "Firmware upgrade subscribe ack");
         cJSON *ota_js = cJSON_Parse(receive_data->data); // 解析平台下发的JSON数据
         if (!ota_js)
@@ -142,7 +142,7 @@ esp_err_t hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type,
         }
         ESP_LOGI(TAG, "OTA URL: %s", url_js->valuestring);
         ESP_LOGI(TAG, "OTA access_token: %s", access_token_js->valuestring);
-        
+
         ota_upgrade_request_t req = {
             .url = url_js->valuestring,
             .access_token = access_token_js->valuestring,
