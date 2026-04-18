@@ -10,6 +10,7 @@
 
 #include "hw_iot_ota.h"
 
+
 static char hw_iot_url[256];
 static char hw_iot_access_token[256];
 
@@ -17,22 +18,25 @@ static hw_iot_ota_finish_callback_t hw_iot_ota_finish_cb = NULL;
 
 static bool is_current_ota_task_running = false;
 
+// OTA任务完成回调函数
 void hw_iot_ota_callback(int code)
 {
 }
 
+// HTTP客户端初始化回调函数
 static esp_err_t hw_iot_http_client_init_cb(esp_http_client_handle_t client)
 {
     char auth_header[192] = {0};
-    if (snprintf(auth_header, sizeof(auth_header), "Bearer %s", hw_iot_access_token) >= sizeof(auth_header))
+    if (snprintf(auth_header, sizeof(auth_header), "Bearer %s", hw_iot_access_token) >= sizeof(auth_header)) // 格式化访问令牌
     {
         return ESP_FAIL;
     }
-    esp_http_client_set_header(client, "Authorization", auth_header);
-    esp_http_client_set_header(client, "Content-Type", "application/json");
+    esp_http_client_set_header(client, "Authorization", auth_header);       // 设置Authorization头
+    esp_http_client_set_header(client, "Content-Type", "application/json"); // 设置Content-Type头
     return ESP_OK;
 }
 
+// OTA任务函数
 void hw_iot_ota_task(void *param)
 {
     const char *TAG = "hw_iot_ota_task";
@@ -58,12 +62,12 @@ void hw_iot_ota_task(void *param)
     if (ota_finish_err != ESP_OK)
     {
         ESP_LOGE(TAG, "Failed to start OTA task, err=%d", ota_finish_err);
-        if (hw_iot_ota_finish_cb)
+        if (hw_iot_ota_finish_cb) // 调用回调函数，通知OTA任务失败
         {
-            hw_iot_ota_finish_cb(ESP_FAIL);
+            hw_iot_ota_finish_cb(ESP_FAIL); // 通知OTA任务失败
         }
-        is_current_ota_task_running = false;
-        vTaskDelete(NULL); // 需要先删除任务，不能直接返回
+        is_current_ota_task_running = false; // OTA任务失败，重置状态
+        vTaskDelete(NULL);                   // 需要先删除任务，不能直接返回
         return;
     }
     else
@@ -71,9 +75,9 @@ void hw_iot_ota_task(void *param)
         if (hw_iot_ota_finish_cb)
         {
             ESP_LOGI(TAG, "OTA task finished");
-            if (hw_iot_ota_finish_cb)
+            if (hw_iot_ota_finish_cb) // 调用回调函数，通知OTA任务完成
             {
-                hw_iot_ota_finish_cb(ESP_OK);
+                hw_iot_ota_finish_cb(ESP_OK); // 通知OTA任务完成
             }
             vTaskDelay(pdMS_TO_TICKS(1000)); // 等待1秒，确保OTA任务完成
             esp_restart();
@@ -83,19 +87,21 @@ void hw_iot_ota_task(void *param)
     vTaskDelete(NULL);
 }
 
+// 启动OTA任务
 esp_err_t hw_iot_ota_start(void)
 {
     const char *TAG = "hw_iot_ota_start";
-    if (is_current_ota_task_running)
+    if (is_current_ota_task_running) // OTA任务正在运行，返回失败
     {
         ESP_LOGE(TAG, "OTA task is running");
         return ESP_FAIL;
     }
-    is_current_ota_task_running = true;
+    is_current_ota_task_running = true;                                                  // OTA任务运行中，设置状态为true
     xTaskCreatePinnedToCore(hw_iot_ota_task, "hw_iot_ota_task", 8192, NULL, 4, NULL, 1); // 创建OTA任务，优先级为4，分配在第一个内核
     return ESP_OK;
 }
 
+// 初始化OTA服务
 esp_err_t hw_iot_ota_init(const char *url, const char *access_token, hw_iot_ota_finish_callback_t cb)
 {
     char *TAG = "hw_iot_ota_init";

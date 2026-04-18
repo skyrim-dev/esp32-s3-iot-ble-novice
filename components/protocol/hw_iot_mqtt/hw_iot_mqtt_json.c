@@ -193,9 +193,9 @@ char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_ota_response_version_json_
 }
 
 // 生成升级状态报告 JSON 字符串
-char *hw_iot_mqtt_upgrade_status_report_json(hw_iot_mqtt_ota_upgrade_status_json_t *json)
+char *hw_iot_mqtt_ota_status_report_json(hw_iot_mqtt_ota_status_json_t *json)
 {
-    char *TAG = "hw_iot_mqtt_upgrade_status_report_json";
+    char *TAG = "hw_iot_mqtt_ota_status_report_json";
     if (!json)
     {
         ESP_LOGE(TAG, "Input json pointer is NULL");
