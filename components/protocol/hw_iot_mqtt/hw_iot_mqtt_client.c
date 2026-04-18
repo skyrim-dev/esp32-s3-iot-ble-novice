@@ -12,6 +12,7 @@
 #include "hw_iot_mqtt_topic.h"
 #include "hw_iot_mqtt_subscribe.h"
 #include "hw_iot_mqtt_publish.h"
+
 #include "ota_manager.h"
 
 extern const char _binary_cert_pem_start[] asm("_binary_cert_pem_start");
