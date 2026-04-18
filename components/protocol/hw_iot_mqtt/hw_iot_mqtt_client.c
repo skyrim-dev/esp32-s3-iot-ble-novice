@@ -13,6 +13,7 @@
 #include "hw_iot_mqtt_subscribe.h"
 #include "hw_iot_mqtt_publish.h"
 #include "hw_iot_ota.h"
+#include "ota_manager.h"
 
 extern const char _binary_cert_pem_start[] asm("_binary_cert_pem_start");
 extern const char _binary_cert_pem_end[] asm("_binary_cert_pem_end");
@@ -141,8 +142,17 @@ esp_err_t hw_iot_mqtt_subscribe_ack(hw_iot_mqtt_subscribe_type_t subscribe_type,
         }
         ESP_LOGI(TAG, "OTA URL: %s", url_js->valuestring);
         ESP_LOGI(TAG, "OTA access_token: %s", access_token_js->valuestring);
-        hw_iot_ota_init(url_js->valuestring, access_token_js->valuestring, hw_iot_ota_callback);
-        hw_iot_ota_start();
+        
+        ota_upgrade_request_t req = {
+            .url = url_js->valuestring,
+            .access_token = access_token_js->valuestring,
+        };
+        if (ota_manager_submit(&req) != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Failed to submit upgrade request");
+            return ESP_FAIL;
+        }
+
         cJSON_Delete(ota_js);
         break;
     default:
