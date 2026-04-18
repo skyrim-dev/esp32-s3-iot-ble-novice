@@ -34,12 +34,6 @@ void hw_iot_ota_callback(int code)
         .description = "ota internal exception", // OTA异常描述：内部异常
     };
 
-    ESP_LOGI(TAG, "OTA report: result=%d progress=%d version=%s desc=%s",
-             report.result_code,
-             report.progress,
-             report.version,
-             report.description);
-
     if (code == ESP_OK)
     {
         report.result_code = 0;                                       // OTA成功
@@ -52,6 +46,12 @@ void hw_iot_ota_callback(int code)
         report.progress = 0;                            // OTA进度：0%
         report.description = "ota installation failed"; // OTA失败描述：OTA安装失败
     }
+
+    ESP_LOGI(TAG, "OTA report: result=%d progress=%d version=%s desc=%s",
+             report.result_code,
+             report.progress,
+             report.version,
+             report.description);   // 保证判断结果码和进度后，再打印描述，避免空指针错误
 
     if (hw_iot_mqtt_ota_status_report_publish(&report) != ESP_OK) // 发布OTA状态报告
     {

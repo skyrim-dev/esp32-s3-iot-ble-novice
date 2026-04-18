@@ -57,6 +57,10 @@ void mqtt_event_callback(void *event_handler_arg,
                 ESP_LOGE(TAG, "Failed to complete OTA post-reboot confirmation");
             }
         }
+        else
+        {
+            ESP_LOGI(TAG, "No OTA post-reboot confirmation pending");
+        }
         break;
     case MQTT_EVENT_DISCONNECTED: // 断开连接确认
         ESP_LOGI(TAG, "Disconnected from broker");
