@@ -6,11 +6,15 @@
 #include <esp_wifi.h>
 #include <freertos/semphr.h>
 #include <nvs_flash.h>
+#include <time.h>
+#include <sys/time.h>
+#include <esp_netif_sntp.h>
 
 #include "wifi.h"
 
 SemaphoreHandle_t wifi_connected_semaphore = NULL;
 
+// WiFi事件回调函数
 void wifi_event_callback(void *event_handler_arg,
                          esp_event_base_t event_base,
                          int32_t event_id,
@@ -51,6 +55,7 @@ void wifi_event_callback(void *event_handler_arg,
     }
 }
 
+// WiFi初始化函数
 void wifi_init(void)
 {
     wifi_connected_semaphore = xSemaphoreCreateBinary(); // 创建二进制信号量
@@ -77,4 +82,34 @@ void wifi_init(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));                     // 设置WiFi模式为STA
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));       // 设置WiFi配置
     ESP_ERROR_CHECK(esp_wifi_start());                                     // 启动WiFi服务
+}
+
+// 时间同步是否完成函数
+bool time_is_synced(void)
+{
+    time_t now = time(NULL);
+    /* 2023-01-01 之后认为时间可信 */
+    return now > 1672531200;
+}
+
+// 时间同步初始化函数
+esp_err_t time_sync_init(void)
+{
+    const char *TAG = "time_sync";
+    if (time_is_synced())
+    {
+        ESP_LOGI(TAG, "System time already synced");
+        return ESP_OK;
+    }
+    ESP_LOGI(TAG, "Initializing SNTP");
+    esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG("pool.ntp.org");
+    esp_netif_sntp_init(&config);
+    esp_netif_sntp_start();
+    if (esp_netif_sntp_sync_wait(pdMS_TO_TICKS(10000)) == ESP_OK)
+    {
+        ESP_LOGI(TAG, "System time synced");
+        return ESP_OK;
+    }
+    ESP_LOGW(TAG, "System time sync timeout");
+    return ESP_FAIL;
 }

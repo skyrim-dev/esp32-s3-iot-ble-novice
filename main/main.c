@@ -37,6 +37,12 @@ void app_main(void)
     xSemaphoreTake(wifi_connected_semaphore, portMAX_DELAY); // 等待WiFi连接成功
     ESP_LOGI(TAG, "WiFi connected");
 
+    /* 初始化时间同步 */
+    if (time_sync_init() != ESP_OK)
+    {
+        ESP_LOGW(TAG, "Time sync failed, event_time may be invalid");
+    }
+
     /* 初始化MQTT客户端 */
     hw_iot_mqtt_init();
 

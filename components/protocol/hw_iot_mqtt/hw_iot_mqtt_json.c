@@ -6,6 +6,39 @@
 
 #include "hw_iot_mqtt_json.h"
 
+// 将cJSON对象序列化为无格式 JSON 字符串
+static char *cJSON_UnformattedFree(cJSON *root_js)
+{
+    char *TAG = "cJSON_UnformattedFree";
+    /* 将cJSON对象序列化为无格式JSON字符串 */
+    char *js_str = cJSON_PrintUnformatted(root_js); // 生成 JSON 字符串，不包含格式化字符
+    if (!js_str)
+    {
+        ESP_LOGE(TAG, "cJSON_PrintUnformatted failed");
+        cJSON_Delete(root_js);
+        return NULL;
+    }
+    ESP_LOGI(TAG, "Generated JSON for service(s): %s", js_str);
+
+    cJSON_Delete(root_js); // 释放根 json 对象
+
+    return js_str;
+}
+
+// 格式化事件时间
+static void hw_iot_mqtt_format_event_time(char *buf, size_t len)
+{
+    time_t now = time(NULL); // 获取当前时间戳
+    if (now < 1672531200)    // 如果当前时间戳小于 2023-01-01 00:00:00，说明时间戳无效
+    {
+        snprintf(buf, len, "19700101T000000Z"); // 如果时间戳无效，返回 1970-01-01 00:00:00Z
+        return;
+    }
+    struct tm tm_info;                              // 定义时间结构体，用于存储时间信息
+    gmtime_r(&now, &tm_info);                       // 将时间戳转换为 UTC 时间结构体
+    strftime(buf, len, "%Y%m%dT%H%M%SZ", &tm_info); // 格式化时间结构体为 YYYYMMDDTHHMMSSZ 格式
+}
+
 // 生成属性报告 JSON 字符串
 char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *json)
 {
@@ -77,11 +110,9 @@ char *hw_iot_mqtt_properties_report_json(hw_iot_mqtt_properties_report_json_t *j
         }
 
         /* 获取当前UTC时间并格式化为华为云要求的格式 */
-        time_t now = time(NULL);                                         // 获取当前时间戳
-        struct tm *tm_info = gmtime(&now);                               // 获取UTC时间结构体
-        char time_buf[32];                                               // 用于存储格式化后的UTC时间字符串
-        strftime(time_buf, sizeof(time_buf), "%Y%m%dT%H%M%SZ", tm_info); // 格式化UTC时间字符串
-        cJSON_AddStringToObject(service_obj_js, "event_time", time_buf); // 添加 time 到服务对象
+        char time_buf[32];
+        hw_iot_mqtt_format_event_time(time_buf, sizeof(time_buf));
+        cJSON_AddStringToObject(service_obj_js, "event_time", time_buf);
 
         i++;
     }
@@ -169,11 +200,9 @@ char *hw_iot_mqtt_ota_version_report_json(hw_iot_mqtt_ota_version_report_json_t 
     cJSON_AddStringToObject(service_obj_js, "event_type", "version_report"); // 添加 event_type 到服务对象，这里固定为version_report
 
     /* 获取当前UTC时间并格式化为华为云要求的格式 */
-    time_t now = time(NULL);                                         // 获取当前时间戳
-    struct tm *tm_info = gmtime(&now);                               // 获取UTC时间结构体
-    char time_buf[32];                                               // 用于存储格式化后的UTC时间字符串
-    strftime(time_buf, sizeof(time_buf), "%Y%m%dT%H%M%SZ", tm_info); // 格式化UTC时间字符串
-    cJSON_AddStringToObject(service_obj_js, "event_time", time_buf); // 添加 time 到服务对象
+    char time_buf[32];
+    hw_iot_mqtt_format_event_time(time_buf, sizeof(time_buf));
+    cJSON_AddStringToObject(service_obj_js, "event_time", time_buf);
 
     cJSON *paras_js = cJSON_CreateObject(); // 创建 paras 对象
     if (!paras_js)
@@ -233,11 +262,9 @@ char *hw_iot_mqtt_ota_status_report_json(hw_iot_mqtt_ota_status_report_json_t *j
     cJSON_AddStringToObject(service_obj_js, "event_type", "upgrade_progress_report"); // 添加 event_type 到服务对象，这里固定为upgrade_progress_report
 
     /* 获取当前UTC时间并格式化为华为云要求的格式 */
-    time_t now = time(NULL);                                         // 获取当前时间戳
-    struct tm *tm_info = gmtime(&now);                               // 获取UTC时间结构体
-    char time_buf[32];                                               // 用于存储格式化后的UTC时间字符串
-    strftime(time_buf, sizeof(time_buf), "%Y%m%dT%H%M%SZ", tm_info); // 格式化UTC时间字符串
-    cJSON_AddStringToObject(service_obj_js, "event_time", time_buf); // 添加 time 到服务对象
+    char time_buf[32];
+    hw_iot_mqtt_format_event_time(time_buf, sizeof(time_buf));
+    cJSON_AddStringToObject(service_obj_js, "event_time", time_buf);
 
     cJSON *paras_js = cJSON_CreateObject(); // 创建 paras 对象
     if (!paras_js)
@@ -254,25 +281,6 @@ char *hw_iot_mqtt_ota_status_report_json(hw_iot_mqtt_ota_status_report_json_t *j
 
     /* 将cJSON对象序列化为无格式JSON字符串 */
     char *js_str = cJSON_UnformattedFree(root_js); // 生成 JSON 字符串，不包含格式化字符
-
-    return js_str;
-}
-
-// 将cJSON对象序列化为无格式 JSON 字符串
-char *cJSON_UnformattedFree(cJSON *root_js)
-{
-    char *TAG = "cJSON_UnformattedFree";
-    /* 将cJSON对象序列化为无格式JSON字符串 */
-    char *js_str = cJSON_PrintUnformatted(root_js); // 生成 JSON 字符串，不包含格式化字符
-    if (!js_str)
-    {
-        ESP_LOGE(TAG, "cJSON_PrintUnformatted failed");
-        cJSON_Delete(root_js);
-        return NULL;
-    }
-    ESP_LOGI(TAG, "Generated JSON for service(s): %s", js_str);
-
-    cJSON_Delete(root_js); // 释放根 json 对象
 
     return js_str;
 }
