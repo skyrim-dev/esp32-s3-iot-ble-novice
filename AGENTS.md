@@ -1,5 +1,8 @@
 # AGENTS.md
 
+**Generated:** 2026-04-20
+**Commit:** f4aca0c
+
 ## 仓库定位
 - 这是一个 ESP-IDF 5.5.1 的 ESP32-S3 工程；根构建入口是 `CMakeLists.txt`，应用入口是 `main/main.c` 里的 `app_main()`。
 - 仓库没有 `README*`、`.github/workflows/`、`.pre-commit-config.yaml`、`opencode.json`；判断流程时以 `CMakeLists.txt`、`sdkconfig`、`components/*/Kconfig`、`docs/*.md` 和本文件为准。
