@@ -25,3 +25,4 @@ dependencies.lock
 # ESP-IDF sdkconfig (local configuration)
 sdkconfig
 sdkconfig.old
+sdkconfig.defaults
