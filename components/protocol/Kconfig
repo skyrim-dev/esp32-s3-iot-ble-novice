@@ -1,0 +1,45 @@
+menu "Huawei Cloud IoT Configuration"
+
+config HW_IOT_HOSTNAME
+    string "MQTT Broker Hostname"
+    default ""
+    help
+        MQTT broker address, e.g., xxx.iotda-device.cn-south-4.myhuaweicloud.com
+
+config HW_IOT_PORT
+    int "MQTT Broker Port"
+    default 8883
+    help
+        MQTT broker TLS port
+
+config HW_IOT_PRODUCTKEY
+    string "Product Key"
+    default ""
+    help
+        Product identifier from Huawei Cloud IoT
+
+config HW_IOT_DEVICE_ID
+    string "Device ID"
+    default ""
+    help
+        Device identifier from Huawei Cloud IoT
+
+config HW_IOT_CLIENT_ID
+    string "MQTT Client ID"
+    default ""
+    help
+        MQTT client identifier
+
+config HW_IOT_USERNAME
+    string "MQTT Username"
+    default ""
+    help
+        MQTT username
+
+config HW_IOT_PASSWORD
+    string "MQTT Password / Device Secret"
+    default ""
+    help
+        MQTT password or Device Secret
+
+endmenu
